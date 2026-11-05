@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Copy, Download, Link2, Save, Unplug } from "lucide-react";
 import { useApp, call } from "@/lib/store";
 import { Button, Card, CardHeader, Field, Input, PageHeader, Textarea } from "@/components/ui";
-import { clearConfig, exportBackup, getConfig, shareLink } from "@/lib/repo";
+import { clearConfig, exportBackup, siteLink } from "@/lib/repo";
 
 export default function Tetapan() {
   const { data, run, toast, confirm } = useApp();
@@ -11,8 +11,7 @@ export default function Tetapan() {
   const [err, setErr] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const set = (k: keyof typeof f, v: string) => setF((p) => ({ ...p, [k]: v }));
-  const cfg = getConfig();
-  const link = cfg ? shareLink(cfg) : "";
+  const link = siteLink();
 
   async function save() {
     const e: Record<string, string> = {};
@@ -48,7 +47,7 @@ export default function Tetapan() {
           <CardHeader title={<span className="flex items-center gap-2"><Link2 className="size-4" />Pautan untuk AJK</span>} sub="Sesiapa yang ada pautan ini boleh melihat dan mengemas kini data. Hantar kepada AJK sahaja; jangan kongsi di tempat awam." />
           <div className="px-5 pb-5 space-y-3">
             <div className="flex gap-2"><Input readOnly value={link} onFocus={(e) => e.currentTarget.select()} aria-label="Pautan kongsi" /><Button variant="gold" onClick={copyLink}><Copy className="size-4" />Salin</Button></div>
-            <p className="text-xs text-slate-500">Pautan ini mengandungi kunci sambungan pangkalan data, jadi AJK tidak perlu buat persediaan apa-apa. Pelayar mereka akan mengingatinya.</p>
+            <p className="text-xs text-slate-500">AJK hanya perlu tekan pautan ini; tiada persediaan atau kata laluan.</p>
           </div>
         </Card>
         <Card>

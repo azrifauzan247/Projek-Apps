@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Check, Copy, Crown, ExternalLink } from "lucide-react";
-import { clearConfig, getConfig, saveConfig } from "@/lib/repo";
+import { clearConfig, getConfig, normalizeUrl, saveConfig } from "@/lib/repo";
 import { SETUP_SQL } from "@/lib/setup-sql";
 import { Button, Field, Input } from "./ui";
 
@@ -14,9 +14,10 @@ export default function Setup({ error, onDone }: { error: string; onDone: () => 
   const missingTables = error === "SETUP_SQL";
 
   function connect() {
-    if (!/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(url.trim())) return setErr("URL mesti seperti https://xxxx.supabase.co");
+    const base = normalizeUrl(url);
+    if (!base) return setErr("URL mesti seperti https://xxxx.supabase.co");
     if (key.trim().length < 30) return setErr("Kunci (anon public) tidak lengkap");
-    setErr(""); clearConfig(); saveConfig({ url: url.trim(), key: key.trim() }); onDone();
+    setErr(""); clearConfig(); saveConfig({ url: base, key: key.trim() }); onDone();
   }
   async function copy() {
     try { await navigator.clipboard.writeText(SETUP_SQL); setCopied(true); setTimeout(() => setCopied(false), 2500); } catch { setErr("Tidak dapat menyalin. Pilih teks SQL dan salin secara manual."); }

@@ -22,12 +22,14 @@ export function getConfig(): Config | null {
   if (stored?.url && stored?.key) return stored;
   return envUrl && envKey ? { url: envUrl, key: envKey } : null;
 }
-export function saveConfig(c: Config) { safe(() => localStorage.setItem(CFG_KEY, JSON.stringify(c)), undefined); client = null; }
-export function clearConfig() { safe(() => localStorage.removeItem(CFG_KEY), undefined); client = null; }
-export function shareLink(c: Config) {
-  const b = btoa(JSON.stringify(c)).replace(/\+/g, "-").replace(/\//g, "_");
-  return `${window.location.origin}${window.location.pathname}#k=${encodeURIComponent(b)}`;
+/** Terima URL yang ditampal dengan /rest/v1/ dan sebagainya; pulangkan alamat asas */
+export function normalizeUrl(u: string): string | null {
+  try { const x = new URL(u.trim()); return /^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(x.origin) ? x.origin : null; } catch { return null; }
 }
+export function saveConfig(c: Config) { c = { ...c, url: normalizeUrl(c.url) ?? c.url }; safe(() => localStorage.setItem(CFG_KEY, JSON.stringify(c)), undefined); client = null; }
+export function clearConfig() { safe(() => localStorage.removeItem(CFG_KEY), undefined); client = null; }
+/** Pautan pendek ke laman (sambungan sudah tersedia dalam app) */
+export function siteLink() { return `${window.location.origin}${process.env.NEXT_PUBLIC_BASE_PATH || ""}/`; }
 export const getWho = () => safe(() => localStorage.getItem(WHO_KEY), null);
 export const setWho = (n: string) => safe(() => localStorage.setItem(WHO_KEY, n), undefined);
 
