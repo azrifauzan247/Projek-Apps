@@ -1,9 +1,11 @@
 "use client";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
-import { LayoutDashboard, Users, ListChecks, MessageSquareMore, BarChart3, ClipboardCheck, FileText, Settings, LogOut, Menu, X, Crown, CalendarDays } from "lucide-react";
-import { useApp, call } from "@/lib/store";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { LayoutDashboard, Users, ListChecks, MessageSquareMore, BarChart3, ClipboardCheck, FileText, Settings, Menu, X, Crown, CalendarDays, UserRound } from "lucide-react";
+import { useApp } from "@/lib/store";
+import { getWho, setWho } from "@/lib/repo";
+import { Button, Modal, Select } from "./ui";
 import { cn } from "./ui";
 import { daysToEvent, needsFollow, followRows } from "@/lib/logic";
 
@@ -17,19 +19,17 @@ const NAV = [
   { href: "/laporan", label: "Laporan", icon: FileText },
   { href: "/tetapan", label: "Tetapan", icon: Settings },
 ];
-const ROLE = { admin: "Pengarah / Admin", leader: "Ketua Unit", member: "Ahli AJK" } as const;
 
 export default function Shell({ children }: { children: React.ReactNode }) {
-  const { data } = useApp();
+  const { data, refresh } = useApp();
   const path = usePathname();
-  const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [whoOpen, setWhoOpen] = useState(false);
+  useEffect(() => { if (getWho() === null) setWhoOpen(true); }, []);
   const days = daysToEvent(data);
-  const followCount = data.me.role === "member" ? 0 : followRows(data).filter(needsFollow).length;
-  const nav = NAV.filter((n) => data.me.role !== "member" || !["/susulan", "/laporan", "/tetapan", "/prestasi"].includes(n.href))
-    .filter((n) => n.href !== "/tetapan" || data.me.role === "admin");
+  const followCount = followRows(data).filter(needsFollow).length;
+  const nav = NAV;
 
-  async function logout() { await call("POST", "/api/auth/logout").catch(() => {}); router.replace("/login"); router.refresh(); }
   const sidebar = (
     <div className="h-full flex flex-col bg-navy-900 text-white">
       <div className="px-5 pt-6 pb-5 border-b border-white/10">
@@ -56,11 +56,10 @@ export default function Shell({ children }: { children: React.ReactNode }) {
         })}
       </nav>
       <div className="p-4 border-t border-white/10">
-        <div className="flex items-center gap-3">
+        <button onClick={() => setWhoOpen(true)} className="w-full flex items-center gap-3 text-left rounded-xl hover:bg-white/5 p-1 cursor-pointer" aria-label="Tukar pengguna">
           <div className="size-9 rounded-full bg-gold-500/20 text-gold-400 grid place-items-center font-bold text-sm">{data.me.name.charAt(0).toUpperCase()}</div>
-          <div className="min-w-0 flex-1 leading-tight"><p className="text-sm font-medium truncate">{data.me.name}</p><p className="text-[11px] text-white/50">{ROLE[data.me.role]}</p></div>
-          <button onClick={logout} aria-label="Log keluar" title="Log keluar" className="p-2 rounded-lg text-white/60 hover:bg-white/10 hover:text-white cursor-pointer"><LogOut className="size-4" /></button>
-        </div>
+          <div className="min-w-0 flex-1 leading-tight"><p className="text-sm font-medium truncate">{data.me.name}</p><p className="text-[11px] text-white/50">Tekan untuk tukar nama</p></div>
+        </button>
       </div>
     </div>
   );
@@ -82,7 +81,20 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       )}
+      <WhoModal open={whoOpen} onClose={() => { if (getWho() === null) setWho("Pengarah"); setWhoOpen(false); refresh(); }} />
       <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 max-w-[1400px] w-full mx-auto fade-in">{children}</main>
     </div>
+  );
+}
+
+function WhoModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { data } = useApp();
+  const [v, setV] = useState(getWho() ?? "");
+  if (!open) return null;
+  return (
+    <Modal open onClose={onClose} title="Siapa anda?" footer={<><Button variant="outline" onClick={onClose}>Langkau</Button><Button variant="gold" onClick={() => { setWho(v || "Pengarah"); onClose(); }}>Simpan</Button></>}>
+      <div className="flex gap-3 mb-4"><UserRound className="size-5 text-gold-600 shrink-0" /><p className="text-sm text-slate-600">Pilih nama anda supaya kemas kini, susulan dan tanda senarai semak direkodkan atas nama anda. Tiada kata laluan diperlukan.</p></div>
+      <Select value={v} onChange={(e) => setV(e.target.value)} aria-label="Pilih nama anda"><option value="">Pengarah</option>{data.members.filter((m) => m.active).map((m) => <option key={m.id} value={m.name}>{m.name} · {data.units.find((u) => u.id === m.unit_id)?.name ?? ""}</option>)}</Select>
+    </Modal>
   );
 }

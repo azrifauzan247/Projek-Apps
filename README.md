@@ -1,52 +1,42 @@
 # AJK COMMAND CENTER 2026
 
-Sistem pengurusan jawatankuasa & susulan tugasan untuk **Hari Anugerah Kecemerlangan dan Apresiasi Ashabul Yamin 2026** (28 November 2026, SM Tahfiz Darul Ridzuan Tambun). Antara muka dalam Bahasa Melayu.
+Sistem pantau jawatankuasa & susulan tugasan untuk **Hari Anugerah Kecemerlangan dan Apresiasi Ashabul Yamin 2026** (28 Nov 2026).
+Laman web biasa (boleh dibuka di telefon), **tiada login**, **percuma**. Data dikongsi oleh semua AJK melalui pangkalan data Supabase percuma.
 
-## Menjalankan
-```bash
-npm install
-cp .env.example .env.local      # pilihan
-npm run build && npm start      # http://localhost:3000
-```
-Kali pertama dijalankan, pangkalan data dicipta di `data/ajk.db` dengan 13 unit / 31 AJK mengikut struktur rasmi, serta akaun **`admin`**.
-Kata laluan admin = `ADMIN_PASSWORD` (jika diset), jika tidak satu kata laluan rawak dicetak di log pelayan. Tukar di **Tetapan**.
+## Persediaan (sekali sahaja, ±10 minit)
 
-## Docker
-```bash
-echo "ADMIN_PASSWORD=KataLaluanAnda123" > .env
-docker compose up -d --build     # buka http://<IP-pelayan>:3000
-```
-Data disimpan dalam volume `ajk-data` (sandarkan volume ini). Jika diakses melalui HTTPS, tambah `COOKIE_SECURE=true` dalam `.env`.
+### A. Pangkalan data (Supabase, percuma)
+1. Daftar di https://supabase.com → **New project**.
+2. **SQL Editor → New query** → tampal kandungan [`supabase/setup.sql`](supabase/setup.sql) → **Run**.
+3. **Project Settings → API**: salin *Project URL* dan kunci *anon public*.
 
-### HTTPS dengan domain (Caddy)
-1. Arahkan rekod DNS **A** domain anda (cth. `ajk.namaanda.com`) ke IP pelayan.
-2. Buka port 80 dan 443 di firewall.
-3. Dalam `.env` tambah `DOMAIN=ajk.namaanda.com`, kemudian:
-```bash
-docker compose -f docker-compose.yml -f docker-compose.https.yml up -d --build
-```
-Sijil HTTPS diperoleh dan diperbaharui secara automatik. Buka `https://ajk.namaanda.com`.
+### B. Hoskan laman (GitHub Pages, percuma)
+1. Merge PR ke `main`.
+2. Di GitHub: **Settings → Pages → Source: GitHub Actions**.
+3. Tunggu tab **Actions** siap. Alamat: `https://<nama-github>.github.io/Projek-Apps/`
+
+### C. Sambung
+1. Buka alamat laman di telefon. Tampal *Project URL* dan kunci → **Sambung & Mula**.
+2. Pergi ke **Tetapan → Pautan untuk AJK** → **Salin**, hantar melalui WhatsApp. AJK hanya perlu tekan pautan itu.
+
+Kali pertama, 13 unit, 31 AJK, 24 tugasan draf dan senarai semak disemai automatik.
+
+## Keselamatan (penting)
+Tiada login: **sesiapa yang ada pautan boleh melihat dan mengubah data**. Hantar pautan kepada AJK sahaja. Jika pautan bocor, jana semula kunci di Supabase (*Settings → API*) dan hantar pautan baharu. Sandaran: **Tetapan → Muat turun sandaran**.
 
 ## Modul
-Dashboard · Direktori AJK · Pengurusan Tugasan (lampiran, sejarah kemajuan) · Pusat Susulan (senarai, sejarah, peringatan, WhatsApp) · Prestasi Unit · Senarai Semak Majlis · Laporan (PDF/Excel + sejarah) · Tetapan (program, templat WhatsApp, akaun).
+Dashboard · Direktori AJK · Pengurusan Tugasan (lampiran, sejarah kemajuan) · Pusat Susulan (WhatsApp melalui pautan `wa.me`, tiada API key) · Prestasi Unit · Senarai Semak Majlis · Laporan (PDF/Excel + sejarah) · Tetapan.
+Pilih nama anda pada kali pertama supaya kemas kini direkodkan atas nama anda (bukan kata laluan).
 
-## Peranan
-| Peranan | Akses |
-|---|---|
-| Pengarah / Admin | Penuh |
-| Ketua Unit | Tugasan, susulan & senarai semak unit sendiri sahaja |
-| Ahli AJK | Kemas kini status/kemajuan/nota/lampiran tugasan sendiri |
+## Nota
+- Hanya no. telefon Pengarah diisi; tambah no. AJK lain di Direktori untuk guna butang WhatsApp.
+- 24 tugasan permulaan ialah **draf** dengan tarikh akhir **cadangan** (kertas cadangan rasmi tidak dibekalkan). Semak dan laraskan.
+- Pelan percuma Supabase menghentikan projek yang tidak aktif 7 hari; buka app sekali seminggu atau klik *Restore* jika berhenti.
 
-Cipta akaun ahli/ketua di **Tetapan → Akaun Pengguna**. Kebenaran dikuatkuasakan di pelayan.
-
-## Nota penting
-- Hanya no. telefon Pengarah (Ustaz Azri) diisi; no. AJK lain dibiarkan kosong — tambah di Direktori jika perlu.
-- Tarikh akhir tugasan permulaan ialah jadual **cadangan** (bekerja ke belakang dari 28 Nov 2026). Laraskan di Pengurusan Tugasan.
-- **Tugasan permulaan (24) ialah draf** berdasarkan fungsi unit, kerana teks deskripsi tugas rasmi kertas cadangan tidak dibekalkan. Ditanda "Draf" — semak/gantikan.
-- Item senarai semak majlis (14 kategori) juga boleh disunting.
-- **WhatsApp** menggunakan pautan `wa.me` — **tiada API key diperlukan**. Mesej dibuka dalam WhatsApp dan Pengarah menekan hantar sendiri. (WhatsApp Business API automatik memerlukan akaun Meta Business + token.)
-- **Pangkalan data**: SQLite (fail tempatan, tiada kunci API). Ia memerlukan pelayan dengan cakera tetap (VPS / Docker volume / Railway / Fly) — **bukan** Vercel/serverless. Sandarkan folder `data/` (pangkalan data + lampiran). Skema SQL mudah dipindahkan ke Supabase/PostgreSQL; itu memerlukan `SUPABASE_URL` + kunci projek anda dan penggantian `src/lib/db.ts`.
-- Set `COOKIE_SECURE=true` jika dihoskan di HTTPS.
-
-## Ujian
-`DATA_DIR=/tmp/x ADMIN_PASSWORD=Testpass123 npx next start -p 3100` kemudian `npm test` (69 semakan API: pengesahan, CRUD, kebenaran peranan, peraturan status, lampiran, laporan).
+## Pembangunan
+```bash
+npm install
+npm run dev          # http://localhost:3000
+npm run build        # hasil statik dalam out/
+npm test             # ujian logik terhadap Postgres (PGURL=postgres://... )
+```

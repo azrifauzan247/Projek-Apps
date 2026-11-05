@@ -1,10 +1,7 @@
-import { redirect } from "next/navigation";
-import { currentUser } from "@/lib/auth";
+"use client";
 import { DataProvider } from "@/lib/store";
 import Shell from "@/components/Shell";
 
-export const dynamic = "force-dynamic";
-export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  if (!(await currentUser())) redirect("/login");
+export default function AppLayout({ children }: { children: React.ReactNode }) {
   return <DataProvider><Shell>{children}</Shell></DataProvider>;
 }

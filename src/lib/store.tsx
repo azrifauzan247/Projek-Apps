@@ -2,19 +2,16 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { AlertTriangle, CheckCircle2, XCircle } from "lucide-react";
 import type { AppData } from "./types";
+import { dispatch, getConfig, zodMessage } from "./repo";
+import Setup from "@/components/Setup";
 import { Button, Modal } from "@/components/ui";
 
 export async function call<T = unknown>(method: string, url: string, body?: unknown): Promise<T> {
-  let res: Response;
   try {
-    res = await fetch(url, { method, headers: body instanceof FormData ? undefined : { "Content-Type": "application/json" }, body: body === undefined ? undefined : body instanceof FormData ? body : JSON.stringify(body) });
-  } catch {
-    throw new Error("Tidak dapat berhubung dengan pelayan. Semak sambungan internet anda.");
+    return (await dispatch(method, url, body)) as T;
+  } catch (e) {
+    throw new Error(zodMessage(e) === "NO_CONFIG" ? "Sambungan pangkalan data belum ditetapkan." : zodMessage(e));
   }
-  if (res.status === 401 && !url.includes("/auth/login")) { window.location.href = "/login"; throw new Error("Sesi tamat. Sila log masuk semula."); }
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error((data as { error?: string }).error || "Ralat tidak diketahui.");
-  return data as T;
 }
 
 interface Toast { id: number; kind: "ok" | "err"; text: string }
@@ -34,19 +31,22 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState("");
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [dlg, setDlg] = useState<{ title: string; message: string; confirmLabel?: string; resolve: (v: boolean) => void } | null>(null);
+  const [cfg, setCfg] = useState<"loading" | "none" | "ok">("loading");
   const busy = useRef(0);
 
   const refresh = useCallback(async () => {
     try { setData(await call<AppData>("GET", "/api/data")); setError(""); } catch (e) { setError((e as Error).message); }
   }, []);
+  useEffect(() => { setCfg(getConfig() ? "ok" : "none"); }, []);
   useEffect(() => {
+    if (cfg !== "ok") return;
     refresh();
     // kemas kini hampir masa nyata: tinjau setiap 20s dan bila tab aktif semula
     const t = setInterval(() => { if (!document.hidden && !busy.current) refresh(); }, 20000);
     const v = () => { if (!document.hidden) refresh(); };
     document.addEventListener("visibilitychange", v);
     return () => { clearInterval(t); document.removeEventListener("visibilitychange", v); };
-  }, [refresh]);
+  }, [refresh, cfg]);
 
   const toast = useCallback((kind: "ok" | "err", text: string) => {
     const id = Date.now() + Math.random();
@@ -65,10 +65,11 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo<Ctx | null>(() => {
     if (!data) return null;
-    const r = data.me.role;
-    return { data, refresh, run, confirm, toast, can: { admin: r === "admin", manage: r === "admin", editTasks: r !== "member", follow: r !== "member" } };
+    return { data, refresh, run, confirm, toast, can: { admin: true, manage: true, editTasks: true, follow: true } };
   }, [data, refresh, run, confirm, toast]);
 
+  if (cfg === "loading") return <div className="min-h-screen grid place-items-center text-slate-500 text-sm">Memuatkan…</div>;
+  if (cfg === "none" || error === "SETUP_SQL" || error === "Kunci Supabase tidak sah. Semak tetapan sambungan.") return <Setup error={error} onDone={() => { setError(""); setCfg("ok"); refresh(); }} />;
   if (!value) {
     return error ? (
       <div className="min-h-screen grid place-items-center p-6 text-center">

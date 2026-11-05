@@ -9,7 +9,7 @@ export interface Task {
   start_date: string | null; deadline: string | null; status: Status; progress: number; notes: string; is_draft: number;
   completed_at: string | null; created_at: string; updated_at: string;
 }
-export interface Attachment { id: number; task_id: number; name: string; size: number; mime: string; created_at: string }
+export interface Attachment { id: number; task_id: number; name: string; stored: string; url: string; size: number; mime: string; created_at: string }
 export interface TaskLog { task_id: number; at: string; status: Status; progress: number; by_user: string }
 export interface Followup {
   id: number; member_id: number; task_id: number | null; contacted_at: string; method: string; summary: string; responded: number;

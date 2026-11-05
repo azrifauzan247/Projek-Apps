@@ -83,7 +83,7 @@ export function TaskForm({ value, onClose }: { value: Partial<Task>; onClose: ()
               <ul className="space-y-1.5">{files.map((a) => (
                 <li key={a.id} className="flex items-center gap-2 rounded-lg bg-navy-50 px-3 py-2 text-sm">
                   <span className="truncate flex-1">{a.name}</span><span className="text-[11px] text-slate-500">{(a.size / 1024).toFixed(0)} KB · {fmtDate(a.created_at)}</span>
-                  <a href={`/api/attachments/${a.id}`} aria-label={`Muat turun ${a.name}`} className="p-1.5 rounded hover:bg-white"><Download className="size-4" /></a>
+                  <a href={a.url} target="_blank" rel="noreferrer" aria-label={`Muat turun ${a.name}`} className="p-1.5 rounded hover:bg-white"><Download className="size-4" /></a>
                   <button onClick={() => delFile(a.id)} aria-label={`Padam ${a.name}`} className="p-1.5 rounded hover:bg-white text-red-600 cursor-pointer"><Trash2 className="size-4" /></button>
                 </li>))}</ul>)}
           </div>
