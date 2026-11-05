@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useId, useRef } from "react";
+import { createPortal } from "react-dom";
 import clsx from "clsx";
 import { Loader2, X, Inbox } from "lucide-react";
 import { PRIORITY_LABEL, STATUS_LABEL } from "@/lib/logic";
@@ -100,19 +101,20 @@ export function Modal({ open, onClose, title, children, footer, wide }: { open: 
     ref.current?.querySelector<HTMLElement>("input,select,textarea")?.focus();
     return () => { document.removeEventListener("keydown", h); document.body.style.overflow = ""; };
   }, [open, onClose]);
-  if (!open) return null;
-  return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
+  if (!open || typeof document === "undefined") return null;
+  return createPortal(
+    <div className="fixed left-0 top-0 w-full h-[100dvh] z-50 flex items-end sm:items-center justify-center sm:p-4">
       <div className="absolute inset-0 bg-navy-950/60 backdrop-blur-[2px]" onClick={onClose} />
-      <div ref={ref} role="dialog" aria-modal="true" aria-labelledby={titleId} className={cn("relative bg-white w-full rounded-t-3xl sm:rounded-2xl shadow-2xl max-h-[92vh] flex flex-col fade-in", wide ? "sm:max-w-3xl" : "sm:max-w-xl")}>
-        <div className="flex items-center justify-between px-5 py-4 border-b border-navy-100">
+      <div ref={ref} role="dialog" aria-modal="true" aria-labelledby={titleId} className={cn("relative bg-white w-full rounded-t-3xl sm:rounded-2xl shadow-2xl max-h-[calc(100dvh-1.5rem)] sm:max-h-[90dvh] flex flex-col fade-in", wide ? "sm:max-w-3xl" : "sm:max-w-xl")}>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-navy-100 shrink-0">
           <h2 id={titleId} className="font-semibold text-navy-900">{title}</h2>
           <button onClick={onClose} aria-label="Tutup" className="p-1.5 rounded-lg hover:bg-navy-50 cursor-pointer"><X className="size-5" /></button>
         </div>
-        <div className="overflow-y-auto p-5 scroll-thin">{children}</div>
-        {footer && <div className="px-5 py-4 border-t border-navy-100 flex flex-col-reverse sm:flex-row sm:justify-end gap-2">{footer}</div>}
+        <div className="overflow-y-auto overscroll-contain min-h-0 flex-1 p-5 scroll-thin">{children}</div>
+        {footer && <div className="shrink-0 px-5 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] border-t border-navy-100 flex flex-row sm:justify-end gap-2 bg-white rounded-b-2xl [&>button]:flex-1 sm:[&>button]:flex-none">{footer}</div>}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
