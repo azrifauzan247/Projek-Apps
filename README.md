@@ -11,6 +11,13 @@ npm run build && npm start      # http://localhost:3000
 Kali pertama dijalankan, pangkalan data dicipta di `data/ajk.db` dengan 13 unit / 31 AJK mengikut struktur rasmi, serta akaun **`admin`**.
 Kata laluan admin = `ADMIN_PASSWORD` (jika diset), jika tidak satu kata laluan rawak dicetak di log pelayan. Tukar di **Tetapan**.
 
+## Docker
+```bash
+echo "ADMIN_PASSWORD=KataLaluanAnda123" > .env
+docker compose up -d --build     # buka http://<IP-pelayan>:3000
+```
+Data disimpan dalam volume `ajk-data` (sandarkan volume ini). Jika diakses melalui HTTPS, tambah `COOKIE_SECURE=true` dalam `.env`.
+
 ## Modul
 Dashboard · Direktori AJK · Pengurusan Tugasan (lampiran, sejarah kemajuan) · Pusat Susulan (senarai, sejarah, peringatan, WhatsApp) · Prestasi Unit · Senarai Semak Majlis · Laporan (PDF/Excel + sejarah) · Tetapan (program, templat WhatsApp, akaun).
 
