@@ -85,7 +85,7 @@ export function WhatsAppModal({ member, onClose, onSent }: { member: Member; onC
           <Field label="Penerima"><Input readOnly value={`${member.name}${member.phone ? ` · ${member.phone}` : ""}`} /></Field>
           <Field label="Tugasan yang disebut"><Select value={taskId} onChange={(e) => pick(e.target.value)}><option value="">— Umum —</option>{open.map((t) => <option key={t.id} value={t.id}>{t.title}</option>)}</Select></Field>
         </div>
-        <Field label="Mesej (boleh disunting sebelum dihantar)" hint="Mesej dibuka dalam WhatsApp; anda yang menekan hantar di sana."><Textarea rows={11} value={msg} onChange={(e) => setMsg(e.target.value)} className="font-[inherit] leading-relaxed" /></Field>
+        <Field label="Mesej (boleh disunting sebelum dihantar)" hint="Mesej dibuka dalam WhatsApp; anda yang menekan hantar di sana."><Textarea rows={7} value={msg} onChange={(e) => setMsg(e.target.value)} className="font-[inherit] leading-relaxed" /></Field>
         <button onClick={() => setMsg(buildWhatsApp(data, member, open.find((t) => String(t.id) === taskId), open))} className="text-xs text-gold-600 font-semibold cursor-pointer inline-flex items-center gap-1"><MessageCircle className="size-3.5" />Set semula mesej asal</button>
       </div>
     </Modal>
