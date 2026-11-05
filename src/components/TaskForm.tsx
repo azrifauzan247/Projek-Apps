@@ -66,7 +66,7 @@ export function TaskForm({ value, onClose }: { value: Partial<Task>; onClose: ()
         <Field label="Keutamaan"><Select disabled={lock} value={f.priority} onChange={(e) => set("priority", e.target.value as Priority)}>{(Object.keys(PRIORITY_LABEL) as Priority[]).map((p) => <option key={p} value={p}>{PRIORITY_LABEL[p]} ({p})</option>)}</Select></Field>
         <Field label="Status"><Select value={f.status} onChange={(e) => setStatus(e.target.value as Status)}><option value="pending">{STATUS_LABEL.pending}</option><option value="ongoing">{STATUS_LABEL.ongoing}</option><option value="done">{STATUS_LABEL.done}</option></Select></Field>
         <Field label="Tarikh mula"><Input disabled={lock} type="date" value={f.start_date} onChange={(e) => set("start_date", e.target.value)} /></Field>
-        <Field label="Tarikh akhir (ditetapkan manual)" error={err.deadline}><Input disabled={lock} type="date" value={f.deadline} onChange={(e) => set("deadline", e.target.value)} /></Field>
+        <Field label="Tarikh akhir" error={err.deadline}><Input disabled={lock} type="date" value={f.deadline} onChange={(e) => set("deadline", e.target.value)} /></Field>
         <Field label={`Kemajuan: ${f.progress}%`} className="sm:col-span-2">
           <input type="range" min={0} max={100} step={5} value={f.progress} onChange={(e) => setProgress(Number(e.target.value))} className="w-full accent-[#c9a227]" aria-label="Peratus kemajuan" />
           <Progress value={f.progress} showLabel={false} className="mt-1" />

@@ -24,7 +24,8 @@ Dashboard · Direktori AJK · Pengurusan Tugasan (lampiran, sejarah kemajuan) ·
 Cipta akaun ahli/ketua di **Tetapan → Akaun Pengguna**. Kebenaran dikuatkuasakan di pelayan.
 
 ## Nota penting
-- **Tiada no. telefon atau tarikh akhir direka.** Isi no. telefon di Direktori dan tetapkan tarikh akhir secara manual.
+- Hanya no. telefon Pengarah (Ustaz Azri) diisi; no. AJK lain dibiarkan kosong — tambah di Direktori jika perlu.
+- Tarikh akhir tugasan permulaan ialah jadual **cadangan** (bekerja ke belakang dari 28 Nov 2026). Laraskan di Pengurusan Tugasan.
 - **Tugasan permulaan (24) ialah draf** berdasarkan fungsi unit, kerana teks deskripsi tugas rasmi kertas cadangan tidak dibekalkan. Ditanda "Draf" — semak/gantikan.
 - Item senarai semak majlis (14 kategori) juga boleh disunting.
 - **WhatsApp** menggunakan pautan `wa.me` — **tiada API key diperlukan**. Mesej dibuka dalam WhatsApp dan Pengarah menekan hantar sendiri. (WhatsApp Business API automatik memerlukan akaun Meta Business + token.)

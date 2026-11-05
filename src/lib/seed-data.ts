@@ -1,11 +1,11 @@
-export interface SeedMember { name: string; position: string; extra?: string }
+export interface SeedMember { name: string; position: string; extra?: string; phone?: string }
 export interface SeedUnit { name: string; description?: string; members: SeedMember[] }
 
 const K = "Ketua";
 export const SEED_UNITS: SeedUnit[] = [
   { name: "Penasihat", members: [{ name: "Ustaz Azizuddin", position: "Penasihat" }, { name: "Ustazah Maisarah", position: "Penasihat" }] },
   { name: "Pengarah (Bendahari & Protokol)", description: "Pengarah program, bendahari dan protokol", members: [
-    { name: "Ustaz Azri", position: "Pengarah", extra: "Bendahari & Protokol" },
+    { name: "Ustaz Azri", position: "Pengarah", extra: "Bendahari & Protokol", phone: "01121030274" },
     { name: "Teacher Revol", position: "Timbalan Pengarah" } ] },
   { name: "Setiausaha (Perhubungan Luar)", members: [{ name: "Ustazah Huda", position: K }, { name: "Ustaz Ikmal", position: "Ahli" }] },
   { name: "Keceriaan & Persiapan Pelajar", members: [{ name: "Ustazah Atiqah", position: K }, { name: "Teacher Hanin", position: "Ahli" }, { name: "Teacher Dina", position: "Ahli" }] },
@@ -21,35 +21,35 @@ export const SEED_UNITS: SeedUnit[] = [
 ];
 
 type P = "Low" | "Medium" | "High" | "Critical";
-const t = (unit: string, title: string, description: string, priority: P) => ({ unit, title, description, priority });
+const t = (unit: string, title: string, description: string, priority: P, deadline: string) => ({ unit, title, description, priority, deadline });
 
 // Tugasan PERMULAAN (draf) berdasarkan fungsi setiap unit. Bukan teks rasmi kertas cadangan –
-// Pengarah dinasihatkan menyemak/menggantikan mengikut deskripsi tugas rasmi. Tiada tarikh akhir ditetapkan.
+// Tarikh akhir ialah jadual CADANGAN bekerja ke belakang dari 28 Nov 2026 – laraskan mengikut keperluan.
 export const SEED_TASKS = [
-  t("Pengarah (Bendahari & Protokol)", "Sediakan bajet dan pantau perbelanjaan", "Sediakan bajet program, rekod kutipan dan perbelanjaan.", "High"),
-  t("Pengarah (Bendahari & Protokol)", "Susunan protokol dan tetamu kehormat", "Sahkan senarai tetamu kehormat, tempat duduk dan aturan protokol.", "High"),
-  t("Setiausaha (Perhubungan Luar)", "Surat jemputan dan perhubungan luar", "Sediakan dan hantar surat jemputan serta jejak pengesahan kehadiran.", "High"),
-  t("Setiausaha (Perhubungan Luar)", "Minit mesyuarat dan rekod urusan", "Rekod minit mesyuarat dan simpan dokumen rasmi program.", "Medium"),
-  t("Keceriaan & Persiapan Pelajar", "Hiasan dan keceriaan dewan", "Rancang dan sediakan hiasan serta keceriaan tempat program.", "Medium"),
-  t("Keceriaan & Persiapan Pelajar", "Persiapan dan pengurusan pelajar", "Susun pelajar, tugasan pelajar dan kehadiran pada hari program.", "High"),
-  t("Teknikal", "Ujian peralatan teknikal", "Persiapan dan pengujian peralatan teknikal.", "Critical"),
-  t("Teknikal", "Sistem PA dan pencahayaan", "Sediakan dan uji sistem PA, mikrofon dan pencahayaan.", "Critical"),
-  t("Pendaftaran & Booth", "Kaunter pendaftaran", "Sediakan kaunter pendaftaran, senarai hadir dan tag nama.", "High"),
-  t("Pendaftaran & Booth", "Pengurusan booth", "Atur penempatan dan keperluan booth.", "Medium"),
-  t("Multimedia", "Pembentangan multimedia dan video", "Sediakan slaid, video dan bahan paparan program.", "High"),
-  t("Multimedia", "Dokumentasi foto dan video", "Atur liputan gambar dan video pada hari program.", "Medium"),
-  t("Pengacara Majlis", "Skrip pengacara majlis", "Sediakan dan muktamadkan skrip pengacara.", "High"),
-  t("Pengacara Majlis", "Latihan pengacara", "Jalankan latihan bersama atur cara dan teknikal.", "Medium"),
-  t("Hadiah & Cenderahati", "Penyediaan hadiah dan anugerah", "Senarai, pembelian dan pembungkusan hadiah serta anugerah.", "High"),
-  t("Hadiah & Cenderahati", "Sijil dan cenderahati", "Sediakan sijil dan cenderahati untuk penerima dan tetamu.", "High"),
-  t("Atur Cara & Persembahan", "Muktamad atur cara majlis", "Sediakan dan sahkan atur cara majlis penuh.", "Critical"),
-  t("Atur Cara & Persembahan", "Latihan persembahan", "Jadual dan jalankan latihan persembahan.", "High"),
-  t("Persiapan Tempat", "Persiapan dewan dan pentas", "Susun dewan, pentas, kerusi dan meja.", "High"),
-  t("Persiapan Tempat", "Susun atur tempat VIP", "Sediakan ruang dan tempat duduk VIP.", "Medium"),
-  t("Persegaran", "Menu dan tempahan makanan", "Tentukan menu, kuantiti dan tempahan makanan serta minuman.", "High"),
-  t("Persegaran", "Pengagihan makanan pada hari program", "Atur pengagihan makanan kepada tetamu, AJK dan pelajar.", "Medium"),
-  t("Kebersihan & Tugas-Tugas Khas", "Kebersihan sebelum dan selepas program", "Atur pembersihan dewan, tandas dan kawasan sekitar.", "Medium"),
-  t("Kebersihan & Tugas-Tugas Khas", "Tugas khas hari program", "Kenal pasti dan agihkan tugas-tugas khas.", "Medium"),
+  t("Pengarah (Bendahari & Protokol)", "Sediakan bajet dan pantau perbelanjaan", "Sediakan bajet program, rekod kutipan dan perbelanjaan.", "High", "2026-11-14"),
+  t("Pengarah (Bendahari & Protokol)", "Susunan protokol dan tetamu kehormat", "Sahkan senarai tetamu kehormat, tempat duduk dan aturan protokol.", "High", "2026-11-18"),
+  t("Setiausaha (Perhubungan Luar)", "Surat jemputan dan perhubungan luar", "Sediakan dan hantar surat jemputan serta jejak pengesahan kehadiran.", "High", "2026-11-10"),
+  t("Setiausaha (Perhubungan Luar)", "Minit mesyuarat dan rekod urusan", "Rekod minit mesyuarat dan simpan dokumen rasmi program.", "Medium", "2026-11-27"),
+  t("Keceriaan & Persiapan Pelajar", "Hiasan dan keceriaan dewan", "Rancang dan sediakan hiasan serta keceriaan tempat program.", "Medium", "2026-11-26"),
+  t("Keceriaan & Persiapan Pelajar", "Persiapan dan pengurusan pelajar", "Susun pelajar, tugasan pelajar dan kehadiran pada hari program.", "High", "2026-11-24"),
+  t("Teknikal", "Ujian peralatan teknikal", "Persiapan dan pengujian peralatan teknikal.", "Critical", "2026-11-26"),
+  t("Teknikal", "Sistem PA dan pencahayaan", "Sediakan dan uji sistem PA, mikrofon dan pencahayaan.", "Critical", "2026-11-26"),
+  t("Pendaftaran & Booth", "Kaunter pendaftaran", "Sediakan kaunter pendaftaran, senarai hadir dan tag nama.", "High", "2026-11-25"),
+  t("Pendaftaran & Booth", "Pengurusan booth", "Atur penempatan dan keperluan booth.", "Medium", "2026-11-24"),
+  t("Multimedia", "Pembentangan multimedia dan video", "Sediakan slaid, video dan bahan paparan program.", "High", "2026-11-22"),
+  t("Multimedia", "Dokumentasi foto dan video", "Atur liputan gambar dan video pada hari program.", "Medium", "2026-11-27"),
+  t("Pengacara Majlis", "Skrip pengacara majlis", "Sediakan dan muktamadkan skrip pengacara.", "High", "2026-11-20"),
+  t("Pengacara Majlis", "Latihan pengacara", "Jalankan latihan bersama atur cara dan teknikal.", "Medium", "2026-11-25"),
+  t("Hadiah & Cenderahati", "Penyediaan hadiah dan anugerah", "Senarai, pembelian dan pembungkusan hadiah serta anugerah.", "High", "2026-11-18"),
+  t("Hadiah & Cenderahati", "Sijil dan cenderahati", "Sediakan sijil dan cenderahati untuk penerima dan tetamu.", "High", "2026-11-20"),
+  t("Atur Cara & Persembahan", "Muktamad atur cara majlis", "Sediakan dan sahkan atur cara majlis penuh.", "Critical", "2026-11-12"),
+  t("Atur Cara & Persembahan", "Latihan persembahan", "Jadual dan jalankan latihan persembahan.", "High", "2026-11-24"),
+  t("Persiapan Tempat", "Persiapan dewan dan pentas", "Susun dewan, pentas, kerusi dan meja.", "High", "2026-11-26"),
+  t("Persiapan Tempat", "Susun atur tempat VIP", "Sediakan ruang dan tempat duduk VIP.", "Medium", "2026-11-25"),
+  t("Persegaran", "Menu dan tempahan makanan", "Tentukan menu, kuantiti dan tempahan makanan serta minuman.", "High", "2026-11-15"),
+  t("Persegaran", "Pengagihan makanan pada hari program", "Atur pengagihan makanan kepada tetamu, AJK dan pelajar.", "Medium", "2026-11-27"),
+  t("Kebersihan & Tugas-Tugas Khas", "Kebersihan sebelum dan selepas program", "Atur pembersihan dewan, tandas dan kawasan sekitar.", "Medium", "2026-11-27"),
+  t("Kebersihan & Tugas-Tugas Khas", "Tugas khas hari program", "Kenal pasti dan agihkan tugas-tugas khas.", "Medium", "2026-11-26"),
 ];
 
 export const SEED_CHECKLIST: [string, string[]][] = [

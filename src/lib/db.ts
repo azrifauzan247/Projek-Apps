@@ -130,27 +130,27 @@ function seed(db: Database.Database) {
     if ((db.prepare("SELECT COUNT(*) c FROM units").get() as { c: number }).c > 0) return;
 
     const insUnit = db.prepare("INSERT INTO units(name,description,sort) VALUES (?,?,?)");
-    const insMember = db.prepare("INSERT INTO members(name,unit_id,position,extra_resp,sort) VALUES (?,?,?,?,?)");
+    const insMember = db.prepare("INSERT INTO members(name,unit_id,position,extra_resp,phone,sort) VALUES (?,?,?,?,?,?)");
     const unitIds: Record<string, number> = {};
     const memberIds: Record<string, number> = {};
     SEED_UNITS.forEach((u, ui) => {
       const uid = Number(insUnit.run(u.name, u.description ?? "", ui + 1).lastInsertRowid);
       unitIds[u.name] = uid;
       u.members.forEach((m, mi) => {
-        const id = Number(insMember.run(m.name, uid, m.position, m.extra ?? "", mi + 1).lastInsertRowid);
+        const id = Number(insMember.run(m.name, uid, m.position, m.extra ?? "", m.phone ?? "", mi + 1).lastInsertRowid);
         memberIds[`${u.name}|${m.name}`] = id;
       });
     });
 
     const insTask = db.prepare(
-      "INSERT INTO tasks(title,description,unit_id,member_id,priority,status,progress,notes,is_draft) VALUES (?,?,?,?,?, 'pending',0,?,1)"
+      "INSERT INTO tasks(title,description,unit_id,member_id,priority,deadline,status,progress,notes,is_draft) VALUES (?,?,?,?,?,?, 'pending',0,?,1)"
     );
     for (const t of SEED_TASKS) {
       const unit = SEED_UNITS.find((u) => u.name === t.unit)!;
       const lead = unit.members.find((m) => m.position.startsWith("Ketua") || m.position === "Pengarah") ?? unit.members[0];
       insTask.run(
-        t.title, t.description, unitIds[t.unit], memberIds[`${t.unit}|${lead.name}`], t.priority,
-        "Tugasan permulaan (draf) – sila semak dengan kertas cadangan rasmi dan tetapkan tarikh akhir."
+        t.title, t.description, unitIds[t.unit], memberIds[`${t.unit}|${lead.name}`], t.priority, t.deadline,
+        "Tugasan permulaan (draf) dengan tarikh akhir cadangan – sila semak dengan kertas cadangan rasmi."
       );
     }
     const insCheck = db.prepare("INSERT INTO checklist(category,title,sort) VALUES (?,?,?)");

@@ -55,7 +55,7 @@ function Tugasan() {
       {can.editTasks && (drafts > 0 || noDeadline > 0) && (
         <div className="mb-5 flex gap-3 rounded-xl border border-gold-400/50 bg-gold-50 p-4 text-sm text-navy-900">
           <Info className="size-5 text-gold-600 shrink-0 mt-0.5" />
-          <p>{drafts > 0 && <><b>{drafts} tugasan</b> ialah tugasan permulaan (draf) berdasarkan fungsi setiap unit — sila semak dan gantikan mengikut deskripsi tugas rasmi dalam kertas cadangan. </>}<b>{noDeadline} tugasan</b> belum mempunyai tarikh akhir; tetapkan secara manual supaya pengesanan "lewat tempoh" berfungsi.</p>
+          <p>{drafts > 0 && <><b>{drafts} tugasan</b> ialah tugasan permulaan (draf) berdasarkan fungsi setiap unit — sila semak dan gantikan mengikut deskripsi tugas rasmi dalam kertas cadangan. </>}{drafts > 0 && "Tarikh akhir yang dipaparkan ialah jadual cadangan — laraskan jika perlu. "}{noDeadline > 0 && <><b>{noDeadline} tugasan</b> belum mempunyai tarikh akhir; tetapkan supaya pengesanan "lewat tempoh" berfungsi.</>}</p>
         </div>
       )}
 

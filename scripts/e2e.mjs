@@ -23,8 +23,8 @@ ok((await admin.login("admin", process.env.ADMIN_PASSWORD || "Testpass123")).sta
 let D = (await admin.req("GET", "/api/data")).body;
 ok(D.me.role === "admin" && D.units.length === 13, "13 unit dimuat");
 ok(D.members.length === 31, `31 ahli (dapat ${D.members.length})`);
-ok(D.members.every((m) => m.phone === ""), "tiada no. telefon direka");
-ok(D.tasks.every((t) => t.deadline === null), "tiada tarikh akhir direka");
+ok(D.members.filter((m) => m.phone).map((m) => m.name).join() === "Ustaz Azri", "hanya no. Pengarah diisi");
+ok(D.tasks.every((t) => t.deadline && t.deadline <= "2026-11-28"), "semua tugasan ada tarikh akhir sebelum majlis");
 ok(D.checklist.length >= 14, "senarai semak diseed");
 ok(!JSON.stringify(D).includes("auth_secret"), "auth_secret tidak bocor");
 
