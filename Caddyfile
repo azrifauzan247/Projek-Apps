@@ -1,0 +1,5 @@
+# HTTPS automatik (Let's Encrypt) untuk domain dalam pembolehubah DOMAIN
+{$DOMAIN} {
+	encode gzip
+	reverse_proxy ajk:3000
+}

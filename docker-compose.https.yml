@@ -1,0 +1,24 @@
+# Guna bersama docker-compose.yml:
+#   docker compose -f docker-compose.yml -f docker-compose.https.yml up -d --build
+services:
+  ajk:
+    ports: !reset []        # app tidak didedahkan terus; hanya melalui Caddy
+    environment:
+      COOKIE_SECURE: "true"
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:?Set DOMAIN dalam fail .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - ajk
+volumes:
+  caddy-data:
+  caddy-config:

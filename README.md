@@ -18,6 +18,15 @@ docker compose up -d --build     # buka http://<IP-pelayan>:3000
 ```
 Data disimpan dalam volume `ajk-data` (sandarkan volume ini). Jika diakses melalui HTTPS, tambah `COOKIE_SECURE=true` dalam `.env`.
 
+### HTTPS dengan domain (Caddy)
+1. Arahkan rekod DNS **A** domain anda (cth. `ajk.namaanda.com`) ke IP pelayan.
+2. Buka port 80 dan 443 di firewall.
+3. Dalam `.env` tambah `DOMAIN=ajk.namaanda.com`, kemudian:
+```bash
+docker compose -f docker-compose.yml -f docker-compose.https.yml up -d --build
+```
+Sijil HTTPS diperoleh dan diperbaharui secara automatik. Buka `https://ajk.namaanda.com`.
+
 ## Modul
 Dashboard · Direktori AJK · Pengurusan Tugasan (lampiran, sejarah kemajuan) · Pusat Susulan (senarai, sejarah, peringatan, WhatsApp) · Prestasi Unit · Senarai Semak Majlis · Laporan (PDF/Excel + sejarah) · Tetapan (program, templat WhatsApp, akaun).
 
