@@ -3,7 +3,7 @@ import pg from "pg";
 import { makePgClient } from "./pg-client.mts";
 import { __setClient, dispatch, setWho } from "../src/lib/repo";
 import { buildReport } from "../src/lib/reports";
-import { followRows, stats, attention } from "../src/lib/logic";
+import { followRows, stats, attention, watchUrgent, todayStr, addDays } from "../src/lib/logic";
 import type { AppData } from "../src/lib/types";
 
 (globalThis as any).localStorage = { _m: new Map<string, string>(), getItem(k: string) { return this._m.get(k) ?? null; }, setItem(k: string, v: string) { this._m.set(k, v); }, removeItem(k: string) { this._m.delete(k); } }; // eslint-disable-line
@@ -18,6 +18,14 @@ await pool.query("truncate units, members, tasks, task_log, attachments, followu
 const client = makePgClient(pool);
 __setClient(client as never);
 const load = async () => (await dispatch("GET", "/api/data")) as AppData;
+
+console.log("# Pantauan: jadual belum dibuat");
+await pool.query("drop table if exists watch_items");
+let W0 = await load(); ok(W0.watchReady === false && W0.watch.length === 0 && W0.units.length === 13, "app tetap berfungsi tanpa jadual pantauan");
+const { readFileSync } = await import("node:fs");
+await pool.query(readFileSync(new URL("../supabase/watch.sql", import.meta.url), "utf8"));
+await pool.query(readFileSync(new URL("../supabase/watch.sql", import.meta.url), "utf8")); // boleh diulang
+W0 = await load(); ok(W0.watchReady === true, "jadual pantauan sedia selepas SQL");
 
 console.log("# Semaian kali pertama");
 let D = await load();
@@ -76,6 +84,26 @@ D = await load(); ok(D.followups.find((f) => f.id === fu.id)?.response === "Siap
 const rows = followRows(D); ok(rows.some((r) => r.member.id === m.id) && rows.length > 10, "senarai susulan dijana");
 ok(attention(D).members.length > 0, "panel perhatian pengarah");
 
+console.log("# Pantauan Pengarah");
+const tl = D.tasks.find((x) => x.id === t.id)!;
+const w1 = (await dispatch("POST", "/api/r/watch", { title: "Pastikan perasmi sahkan", notes: "Hubungi pejabat", owner: "Pengarah", priority: "Critical", due_date: addDays(todayStr(), 1) })) as { id: number };
+const w2 = (await dispatch("POST", "/api/r/watch", { title: "Pantau tugasan ujian", task_id: tl.id, owner: "Timbalan Pengarah" })) as { id: number };
+await rejects(dispatch("POST", "/api/r/watch", { title: " " }), /diperlukan/, "tajuk pantauan kosong");
+await rejects(dispatch("POST", "/api/r/watch", { title: "x", owner: "Orang Lain" }), /owner/, "pemilik tidak sah");
+D = await load(); ok(D.watch.length === 2 && D.watch[0].created_by === "Ustaz Anam" && D.watch[0].notes === "Hubungi pejabat", "pantauan disimpan");
+ok(watchUrgent(D).map((w) => w.id).sort().join() === [w1.id, w2.id].sort().join(), "mendesak: tarikh hampir (w1) dan tugasan berkaitan lewat (w2)");
+await dispatch("PATCH", `/api/r/watch/${w2.id}`, { title: "Pantau tugasan ujian", task_id: tl.id, owner: "Berdua", notes: "nota baharu", due_date: null, priority: "High" });
+D = await load(); ok(D.watch.find((w) => w.id === w2.id)!.owner === "Berdua" && D.watch.find((w) => w.id === w2.id)!.notes === "nota baharu", "sunting pantauan");
+await dispatch("PATCH", `/api/r/watch/${w1.id}`, { done: true });
+D = await load(); const done1 = D.watch.find((w) => w.id === w1.id)!; ok(done1.done === 1 && done1.done_by === "Ustaz Anam" && watchUrgent(D).map((w) => w.id).join() === String(w2.id), "tanda siap menyingkirkan dari mendesak");
+await dispatch("PATCH", `/api/r/watch/${w1.id}`, { done: false }); ok((await load()).watch.find((w) => w.id === w1.id)!.done === 0, "buka semula pantauan");
+const tmp = (await dispatch("POST", "/api/r/tasks", { title: "Sementara", unit_id: u.id })) as { id: number };
+const w3 = (await dispatch("POST", "/api/r/watch", { title: "Pantau sementara", task_id: tmp.id })) as { id: number };
+await dispatch("DELETE", `/api/r/tasks/${tmp.id}`); D = await load();
+ok(D.watch.find((w) => w.id === w3.id)!.task_id === null, "padam tugasan tidak memadam pantauan (pautan dikosongkan)");
+await dispatch("DELETE", `/api/r/watch/${w3.id}`);
+await dispatch("DELETE", `/api/r/watch/${w1.id}`); await dispatch("DELETE", `/api/r/watch/${w2.id}`); ok((await load()).watch.length === 0, "padam pantauan");
+const bk = JSON.parse((await import("../src/lib/repo")).exportBackup ? await (await import("../src/lib/repo")).exportBackup() : "{}"); ok("watch" in bk, "sandaran merangkumi pantauan");
 console.log("# Senarai semak, tetapan, laporan");
 const c0 = D.checklist[0];
 await dispatch("PATCH", `/api/r/checklist/${c0.id}`, { done: true });

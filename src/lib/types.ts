@@ -18,11 +18,15 @@ export interface Followup {
 export interface CheckItem { id: number; category: string; title: string; done: number; done_at: string | null; done_by: string; sort: number }
 export interface ReportMeta { id: number; type: string; title: string; created_by: string; created_at: string }
 export interface UserRow { id: number; username: string; role: Role; member_id: number | null; created_at: string }
+export interface WatchItem {
+  id: number; title: string; notes: string; task_id: number | null; owner: "Pengarah" | "Timbalan Pengarah" | "Berdua";
+  due_date: string | null; priority: Priority; done: number; done_at: string | null; done_by: string; created_by: string; created_at: string; updated_at: string;
+}
 export interface Settings {
   event_name: string; event_date: string; venue: string; director: string; stale_days: string; soon_days: string; wa_template: string;
 }
 export interface AppData {
   me: Me; settings: Settings; units: Unit[]; members: Member[]; tasks: Task[]; attachments: Attachment[]; taskLog: TaskLog[];
-  followups: Followup[]; checklist: CheckItem[]; reports: ReportMeta[]; users: UserRow[];
+  followups: Followup[]; checklist: CheckItem[]; reports: ReportMeta[]; users: UserRow[]; watch: WatchItem[]; watchReady: boolean;
 }
 export type EffStatus = "done" | "overdue" | "ongoing" | "pending";

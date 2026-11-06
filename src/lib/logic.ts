@@ -141,3 +141,16 @@ export function waNumber(phone: string) {
   else if (n.startsWith("0")) n = "60" + n.slice(1);
   return n;
 }
+
+/** Item pantauan yang perlu perhatian: belum siap dan (tarikh sudah/hampir tiba, atau tugasan berkaitan lewat) */
+export function watchUrgent(d: AppData) {
+  const today = todayStr();
+  const soon = Number(d.settings.soon_days) || 3;
+  return (d.watch ?? []).filter((w) => {
+    if (w.done) return false;
+    const task = w.task_id ? d.tasks.find((t) => t.id === w.task_id) : undefined;
+    const dueSoon = !!w.due_date && daysBetween(today, w.due_date) <= soon;
+    const taskLate = !!task && effStatus(task, today) === "overdue";
+    return dueSoon || taskLate;
+  });
+}
