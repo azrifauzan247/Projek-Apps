@@ -1,4 +1,4 @@
-// Dijana daripada supabase/setup.sql
+// Dijana daripada supabase/setup.sql dan supabase/watch.sql
 export const SETUP_SQL = `-- AJK COMMAND CENTER 2026: skema pangkalan data (Supabase). Jalankan SEKALI di SQL Editor.
 create table if not exists units (
   id bigint generated always as identity primary key,
@@ -50,6 +50,25 @@ create table if not exists reports (
   type text not null, title text not null, payload jsonb not null,
   created_by text not null default '', created_at text not null default ''
 );
+-- Pantauan Pengarah
+id bigint generated always as identity primary key,
+  title text not null,
+  notes text not null default '',
+  task_id bigint references tasks(id) on delete set null,
+  owner text not null default 'Berdua' check (owner in ('Pengarah', 'Timbalan Pengarah', 'Berdua')),
+  due_date text,
+  priority text not null default 'Medium' check (priority in ('Low', 'Medium', 'High', 'Critical')),
+  done int not null default 0,
+  done_at text,
+  done_by text not null default '',
+  created_by text not null default '',
+  created_at text not null default '',
+  updated_at text not null default ''
+);
+alter table watch_items enable row level security;
+drop policy if exists open_access on watch_items;
+create policy open_access on watch_items for all using (true) with check (true);
+
 create table if not exists settings (key text primary key, value text not null);
 
 create index if not exists idx_tasks_unit on tasks(unit_id);
@@ -71,4 +90,24 @@ end $$;
 insert into storage.buckets (id, name, public) values ('lampiran', 'lampiran', true) on conflict (id) do nothing;
 drop policy if exists lampiran_open on storage.objects;
 create policy lampiran_open on storage.objects for all using (bucket_id = 'lampiran') with check (bucket_id = 'lampiran');
+`;
+export const WATCH_SQL = `-- AJK COMMAND CENTER 2026: jadual "Pantauan Pengarah". Jalankan SEKALI di SQL Editor (selamat diulang).
+create table if not exists watch_items (
+  id bigint generated always as identity primary key,
+  title text not null,
+  notes text not null default '',
+  task_id bigint references tasks(id) on delete set null,
+  owner text not null default 'Berdua' check (owner in ('Pengarah', 'Timbalan Pengarah', 'Berdua')),
+  due_date text,
+  priority text not null default 'Medium' check (priority in ('Low', 'Medium', 'High', 'Critical')),
+  done int not null default 0,
+  done_at text,
+  done_by text not null default '',
+  created_by text not null default '',
+  created_at text not null default '',
+  updated_at text not null default ''
+);
+alter table watch_items enable row level security;
+drop policy if exists open_access on watch_items;
+create policy open_access on watch_items for all using (true) with check (true);
 `;

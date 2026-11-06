@@ -2,15 +2,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { LayoutDashboard, Users, ListChecks, MessageSquareMore, BarChart3, ClipboardCheck, FileText, Settings, Menu, X, Crown, CalendarDays, UserRound } from "lucide-react";
+import { LayoutDashboard, Users, ListChecks, MessageSquareMore, BarChart3, ClipboardCheck, FileText, Settings, Menu, X, Crown, CalendarDays, UserRound, Eye } from "lucide-react";
 import { useApp } from "@/lib/store";
 import { getWho, setWho } from "@/lib/repo";
 import { Button, Modal, Select } from "./ui";
 import { cn } from "./ui";
-import { daysToEvent, needsFollow, followRows } from "@/lib/logic";
+import { daysToEvent, needsFollow, followRows, watchUrgent } from "@/lib/logic";
 
 const NAV = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/pantauan", label: "Pantauan Pengarah", icon: Eye, watch: true },
   { href: "/direktori", label: "Direktori AJK", icon: Users },
   { href: "/tugasan", label: "Pengurusan Tugasan", icon: ListChecks },
   { href: "/susulan", label: "Pusat Susulan", icon: MessageSquareMore, badge: true },
@@ -28,6 +29,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   useEffect(() => { if (getWho() === null) setWhoOpen(true); }, []);
   const days = daysToEvent(data);
   const followCount = followRows(data).filter(needsFollow).length;
+  const watchCount = watchUrgent(data).length;
   const nav = NAV;
 
   const sidebar = (
@@ -43,7 +45,8 @@ export default function Shell({ children }: { children: React.ReactNode }) {
         </div>
       </div>
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1" aria-label="Navigasi utama">
-        {nav.map(({ href, label, icon: Icon, badge }) => {
+        {nav.map(({ href, label, icon: Icon, ...rest }) => {
+          const badge = "badge" in rest && rest.badge; const watch = "watch" in rest && rest.watch;
           const active = href === "/" ? path === "/" : path.startsWith(href);
           return (
             <Link key={href} href={href} onClick={() => setOpen(false)} aria-current={active ? "page" : undefined}
@@ -51,6 +54,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
               <Icon className={cn("size-[18px]", active && "text-gold-400")} />
               <span className="flex-1">{label}</span>
               {badge && followCount > 0 && <span className="bg-gold-500 text-navy-950 text-[11px] font-bold rounded-full px-2 py-0.5">{followCount}</span>}
+              {watch && watchCount > 0 && <span className="bg-gold-500 text-navy-950 text-[11px] font-bold rounded-full px-2 py-0.5">{watchCount}</span>}
             </Link>
           );
         })}
