@@ -40,3 +40,10 @@ npm run dev          # http://localhost:3000
 npm run build        # hasil statik dalam out/
 npm test             # ujian logik terhadap Postgres (PGURL=postgres://... )
 ```
+
+## Halaman RSVP (jemputan awam)
+
+Halaman jemputan bergaya kad kahwin dengan tema laut, muzik latar, gelembung dan ikan bergerak. Terletak di `public/rsvp/index.html` (alamat: `<laman>/rsvp/`). Tiada pergantungan; semua dalam satu fail.
+
+- **Pengesahan kehadiran:** jalankan `supabase/rsvp.sql` sekali. Pengunjung hanya boleh *menambah* rekod; data dilihat di SQL Editor. Pautan yang diberi kepada ibu bapa membawa konfigurasi Supabase di `#k=` (sama seperti app AJK).
+- **Surat jemputan mengikut nama pelajar:** letak PDF dalam satu folder dengan nama fail = nama penuh pelajar (cth `AHMAD BIN ABDULLAH.pdf`), kemudian jalankan `python3 scripts/rsvp-surat.py <folder-pdf>`. Fail disalin dengan nama rawak ke `public/rsvp/surat/` dan hanya cincang nama disimpan dalam `index.json`, jadi senarai nama tidak boleh dilihat pengunjung.
