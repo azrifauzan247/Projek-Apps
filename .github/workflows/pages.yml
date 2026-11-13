@@ -20,6 +20,17 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Tulis konfigurasi RSVP (jika pembolehubah repo ditetapkan)
+        env:
+          SB_URL: ${{ vars.SUPABASE_URL }}
+          SB_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+        run: |
+          if [ -n "$SB_URL" ] && [ -n "$SB_KEY" ]; then
+            node -e 'require("fs").writeFileSync("public/JemputanHariAnugerahAkramin2026/config.js","window.RSVP_CONFIG="+JSON.stringify({url:process.env.SB_URL,key:process.env.SB_KEY})+";\n")'
+            echo "Konfigurasi RSVP ditulis."
+          else
+            echo "Pembolehubah SUPABASE_URL/SUPABASE_ANON_KEY tiada: RSVP guna pautan #k atau WhatsApp."
+          fi
       - run: npm run build
         env:
           NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}

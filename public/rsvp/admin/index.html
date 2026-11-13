@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
+<script src="../../JemputanHariAnugerahAkramin2026/config.js"></script>
 <title>Admin Surat Jemputan</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
 <style>
@@ -98,6 +99,7 @@ function kb(n){return n>1048576?(n/1048576).toFixed(1)+' MB':Math.max(1,Math.rou
 var CFG=null;
 (function(){var m=location.hash.match(/[#&]k=([^&]+)/);try{if(m){CFG=JSON.parse(atob(decodeURIComponent(m[1]).replace(/-/g,'+').replace(/_/g,'/')));localStorage.setItem('ay_rsvp_cfg',JSON.stringify(CFG));history.replaceState(null,'',location.pathname)}}catch(e){}
  if(!CFG){try{CFG=JSON.parse(localStorage.getItem('ay_rsvp_cfg')||'null')}catch(e){}}
+ if((!CFG||!CFG.url||!CFG.key)&&window.RSVP_CONFIG&&window.RSVP_CONFIG.url&&window.RSVP_CONFIG.key)CFG={url:window.RSVP_CONFIG.url,key:window.RSVP_CONFIG.key};
  if(!CFG||!CFG.url||!CFG.key)$('#cfgBox').classList.remove('hide');else if(CFG)CFG.url=String(CFG.url).replace(/\/rest\/v1\/?$/,'').replace(/\/$/,'')})();
 var PW='';
 function rpc(fn,args){return fetch(CFG.url+'/rest/v1/rpc/'+fn,{method:'POST',headers:{'Content-Type':'application/json',apikey:CFG.key,Authorization:'Bearer '+CFG.key},body:JSON.stringify(args)}).then(function(r){return r.text().then(function(t){var j=null;try{j=t?JSON.parse(t):null}catch(e){}if(!r.ok)throw new Error((j&&(j.message||j.hint))||('Ralat '+r.status));return j})})}
