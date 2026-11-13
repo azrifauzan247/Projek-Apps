@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Sediakan surat jemputan untuk halaman RSVP.
 
-Guna:  python3 scripts/rsvp-surat.py <folder-pdf> [--out public/rsvp/surat]
+Guna:  python3 scripts/rsvp-surat.py <folder-pdf> [--out public/JemputanHariAnugerahAkramin2026/surat]
 
 Letak semua PDF dalam satu folder. NAMA FAIL = NAMA PENUH PELAJAR, cth:
     AHMAD BIN ABDULLAH.pdf
@@ -28,7 +28,7 @@ def key(name: str) -> str:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("src", type=Path)
-    ap.add_argument("--out", type=Path, default=Path("public/rsvp/surat"))
+    ap.add_argument("--out", type=Path, default=Path("public/JemputanHariAnugerahAkramin2026/surat"))
     a = ap.parse_args()
     pdfs = sorted(a.src.glob("*.pdf"))
     if not pdfs:
