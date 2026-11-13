@@ -359,13 +359,23 @@ var SALT='ay2026|';
 /* ---------- surat jemputan ---------- */
 var idx=null;
 function loadIdx(){if(idx)return Promise.resolve(idx);return fetch('surat/index.json',{cache:'no-store'}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){idx=j;return j}).catch(function(){idx={};return idx})}
+function rpc(fn,args){return fetch(CFG.url+'/rest/v1/rpc/'+fn,{method:'POST',headers:{'Content-Type':'application/json',apikey:CFG.key,Authorization:'Bearer '+CFG.key},body:JSON.stringify(args)}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})}
+function b64blob(b64,type){var bin=atob(b64),n=bin.length,u=new Uint8Array(n);for(var i=0;i<n;i++)u[i]=bin.charCodeAt(i);return new Blob([u],{type:type||'application/pdf'})}
+function fileName(disp){return 'Surat-Jemputan-'+disp.replace(/[^A-Z0-9 ]+/g,'').replace(/ /g,'-')+'.pdf'}
+function lookup(h,n){
+ /* 1) pangkalan data (muat naik admin)  2) fail statik surat/index.json (sandaran) */
+ var first=CFG?rpc('ambil_surat',{p_hash:h}).then(function(rows){return rows&&rows[0]?{kind:'db',row:rows[0]}:null}).catch(function(){return null}):Promise.resolve(null);
+ return first.then(function(r){if(r)return r;return loadIdx().then(function(j){var f=j[h];return f?{kind:'file',file:f}:null})})}
 function findLetter(){var raw=$('#sName').value,n=norm(raw),out=$('#sRes');if(n.split(' ').length<2){out.innerHTML='<div class="res no">Sila taip nama penuh pelajar (sekurang-kurangnya dua perkataan).</div>';return}
  out.innerHTML='<div class="res">Mencari…</div>';
- loadIdx().then(function(j){var f=j[sha256(SALT+n)];
-  if(f){var disp=raw.trim().replace(/\s+/g,' ').toUpperCase();var fname='Surat-Jemputan-'+disp.replace(/[^A-Z0-9 ]+/g,'').replace(/ /g,'-')+'.pdf';
-   out.innerHTML='<div class="res ok">Surat jemputan untuk <b></b> ditemui.<div class="row"><a class="btn" href="surat/'+f+'" download="'+fname+'">Muat Turun PDF</a></div></div>';out.querySelector('b').textContent=disp;
-   if(!$('#rStudent').value)$('#rStudent').value=disp}
-  else out.innerHTML='<div class="res no">Nama tidak ditemui. Semak ejaan nama penuh, atau surat belum tersedia. Hubungi urusetia di bawah jika perlu.</div>'})}
+ lookup(sha256(SALT+n),n).then(function(r){
+  if(!r){out.innerHTML='<div class="res no">Nama tidak ditemui. Semak ejaan nama penuh, atau surat belum tersedia. Hubungi urusetia di bawah jika perlu.</div>';return}
+  var disp=raw.trim().replace(/\s+/g,' ').toUpperCase(),fname=fileName(disp);
+  out.innerHTML='<div class="res ok">Surat jemputan untuk <b></b> ditemui.<div class="row"><a class="btn" id="dlBtn" href="#">Muat Turun PDF</a></div></div>';out.querySelector('b').textContent=disp;
+  var a=$('#dlBtn');
+  if(r.kind==='file'){a.href='surat/'+r.file;a.setAttribute('download',fname)}
+  else a.addEventListener('click',function(e){e.preventDefault();var u=URL.createObjectURL(b64blob(r.row.data));var l=document.createElement('a');l.href=u;l.download=fname;document.body.appendChild(l);l.click();l.remove();setTimeout(function(){URL.revokeObjectURL(u)},4000)});
+  if(!$('#rStudent').value)$('#rStudent').value=disp})}
 $('#sBtn').addEventListener('click',findLetter);$('#sName').addEventListener('keydown',function(e){if(e.key==='Enter')findLetter()});
 
 /* ---------- RSVP ---------- */
