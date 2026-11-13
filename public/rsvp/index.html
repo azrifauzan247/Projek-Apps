@@ -227,7 +227,7 @@ footer{position:relative;z-index:10;text-align:center;padding:0 20px 120px;font:
 
  <section class="sec" id="rsvp">
   <div class="orn"><i></i><b>✦</b><i></i></div>
-  <h2>Pengesahan Kehadiran</h2><div class="sub">RSVP · SEBELUM 25 NOVEMBER 2026</div>
+  <h2>Pengesahan Kehadiran</h2><div class="sub">RSVP · SEBELUM 20 NOVEMBER 2026</div>
   <form id="rf" novalidate>
    <label for="rStudent">Nama penuh pelajar</label>
    <input type="text" id="rStudent" required maxlength="120" placeholder="Nama seperti dalam rekod" autocapitalize="characters">
@@ -249,7 +249,7 @@ footer{position:relative;z-index:10;text-align:center;padding:0 20px 120px;font:
    <div class="row" style="margin-top:22px"><button class="btn" id="rBtn" type="submit">Hantar Pengesahan</button></div>
    <div id="rRes"></div>
   </form>
-  <div class="thanks" id="thanks"><div class="script">Terima Kasih</div><p class="note" id="thMsg"></p><div class="row"><a class="btn small" id="waBtn" target="_blank" rel="noopener" href="#">Hantar juga melalui WhatsApp</a></div></div>
+  <div class="thanks" id="thanks"><div class="script">Terima Kasih</div><p class="note" id="thMsg"></p><div class="row"><a class="btn small" id="waBtn" target="_blank" rel="noopener" href="#">Hantar juga melalui WhatsApp (Unit Pendaftaran)</a></div></div>
  </section>
 
  <section class="sec c">
@@ -257,7 +257,11 @@ footer{position:relative;z-index:10;text-align:center;padding:0 20px 120px;font:
   <div class="script" style="font-size:46px">Jumpa di Majlis</div>
   <p class="note">Semoga kehadiran anda menjadikan majlis ini lebih bermakna buat anak-anak kita.</p>
   <div class="mot">“HIDUP BERPANDUKAN ALQURAN”</div>
-  <p class="note" style="margin-top:16px">Pertanyaan: Ustaz Azri, <a href="tel:+601121030274" style="color:var(--gold2);font-weight:700;text-decoration:none">011-21030274</a></p>
+  <p class="note" style="margin-top:16px"><b>Unit Pendaftaran</b><br>Pertanyaan atau pengesahan kehadiran:</p>
+  <div class="row" style="margin-top:8px">
+   <a class="btn small" href="https://wa.me/60129187235" target="_blank" rel="noopener">Cikgu Aqila · 012-918 7235</a>
+   <a class="btn small ghost" href="https://wa.me/601116137643" target="_blank" rel="noopener">Ustazah Sarah · 011-1613 7643</a>
+  </div>
  </section>
 </main>
 <footer>HARI ANUGERAH KECEMERLANGAN DAN APRESIASI ASHABUL YAMIN 2026<br>#AshabulYamin2026</footer>
@@ -369,7 +373,7 @@ function lookup(h,n){
 function findLetter(){var raw=$('#sName').value,n=norm(raw),out=$('#sRes');if(n.split(' ').length<2){out.innerHTML='<div class="res no">Sila taip nama penuh pelajar (sekurang-kurangnya dua perkataan).</div>';return}
  out.innerHTML='<div class="res">Mencari…</div>';
  lookup(sha256(SALT+n),n).then(function(r){
-  if(!r){out.innerHTML='<div class="res no">Nama tidak ditemui. Semak ejaan nama penuh, atau surat belum tersedia. Hubungi urusetia di bawah jika perlu.</div>';return}
+  if(!r){out.innerHTML='<div class="res no">Nama tidak ditemui. Semak ejaan nama penuh, atau surat belum tersedia. Hubungi Unit Pendaftaran di bawah jika perlu.</div>';return}
   var disp=raw.trim().replace(/\s+/g,' ').toUpperCase(),fname=fileName(disp);
   out.innerHTML='<div class="res ok">Surat jemputan untuk <b></b> ditemui.<div class="row"><a class="btn" id="dlBtn" href="#">Muat Turun PDF</a></div></div>';out.querySelector('b').textContent=disp;
   var a=$('#dlBtn');
@@ -394,7 +398,7 @@ $('#rf').addEventListener('submit',function(e){e.preventDefault();var res=$('#rR
  if(ph.replace(/\D/g,'').length<9){res.innerHTML='<div class="res no">Sila isi no. telefon yang sah.</div>';return}
  var row={student:st.toUpperCase(),unit:un,guardian:gd,phone:ph,attending:att,guests:att?gs:0,paid:paid,note:nt};
  var btn=$('#rBtn');btn.disabled=true;btn.textContent='Menghantar…';
- var wa='https://wa.me/601121030274?text='+encodeURIComponent('Salam, pengesahan kehadiran Hari Anugerah Ashabul Yamin 2026.\nPelajar: '+row.student+'\nUnit/Kelas: '+(un||'-')+'\nWaris: '+gd+' ('+ph+')\nKehadiran: '+(att?'Hadir ('+gs+' orang)':'Tidak dapat hadir')+'\nYuran RM30: '+(paid==='sudah'?'Sudah dibayar':'Belum dibayar')+(nt?'\nCatatan: '+nt:''));
+ var wa='https://wa.me/60129187235?text='+encodeURIComponent('Salam, pengesahan kehadiran Hari Anugerah Ashabul Yamin 2026.\nPelajar: '+row.student+'\nUnit/Kelas: '+(un||'-')+'\nWaris: '+gd+' ('+ph+')\nKehadiran: '+(att?'Hadir ('+gs+' orang)':'Tidak dapat hadir')+'\nYuran RM30: '+(paid==='sudah'?'Sudah dibayar':'Belum dibayar')+(nt?'\nCatatan: '+nt:''));
  function done(sent){$('#rf').style.display='none';var t=$('#thanks');t.style.display='block';$('#waBtn').href=wa;
   $('#thMsg').textContent=(sent?'Pengesahan anda telah direkodkan. ':'Pengesahan belum dapat dihantar secara terus. Sila hantar melalui WhatsApp di bawah. ')+(att?'Jumpa anda pada 28 November 2026!':'Kami faham. Semoga berjumpa di majlis akan datang.');
   if(!sent){t.querySelector('.script').textContent='Hampir Siap'}t.scrollIntoView({behavior:'smooth',block:'center'})}
