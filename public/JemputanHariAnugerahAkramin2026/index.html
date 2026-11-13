@@ -107,6 +107,10 @@ label{display:block;font:700 12px Montserrat;letter-spacing:.14em;color:var(--aq
 input[type=text],input[type=tel],input[type=number],textarea,select{width:100%;font:500 16px Montserrat;color:#fff;background:rgba(255,255,255,.09);border:1.5px solid rgba(227,185,79,.5);border-radius:14px;padding:13px 15px;outline:none;transition:border .2s,box-shadow .2s}
 input:focus,textarea:focus,select:focus{border-color:var(--gold2);box-shadow:0 0 0 4px rgba(246,215,126,.18)}
 textarea{min-height:84px;resize:vertical}
+input[type=file]{width:100%;font:500 14px Montserrat;color:var(--pearl);background:rgba(255,255,255,.07);border:1.5px dashed rgba(127,229,220,.7);border-radius:14px;padding:12px}
+input[type=file]::file-selector-button{font:700 13px Montserrat;border:0;border-radius:999px;padding:9px 16px;margin-right:12px;color:#06142E;background:linear-gradient(170deg,#FBE08C,#E3B94F)}
+.proof{margin-top:24px;padding:18px 16px 20px;border-radius:22px;border:1.5px dashed rgba(127,229,220,.65);background:rgba(127,229,220,.07)}
+.proof h3{font:400 38px/1.1 'Great Vibes',cursive;color:var(--gold2);text-align:center}
 ::placeholder{color:rgba(247,243,232,.45)}
 .seg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .seg input{position:absolute;opacity:0;pointer-events:none}
@@ -212,6 +216,19 @@ footer{position:relative;z-index:10;text-align:center;padding:0 20px 120px;font:
   </div>
   <p class="note">Akaun ini ialah akaun rasmi Akramin untuk urusan pembayaran yuran. Sila letakkan <b>nama pelajar</b> sebagai rujukan pembayaran dan simpan resit.</p>
   <p class="note" style="margin-top:6px">Sekian, Jazakumullah Khairan Kathira.</p>
+  <div class="proof" id="proof">
+   <h3>Muat Naik Bukti Pembayaran</h3>
+   <p class="note" style="margin-top:4px">Sudah membayar RM30? Muat naik resit atau tangkapan skrin pindahan di sini (gambar atau PDF).</p>
+   <label for="pStudent">Nama penuh pelajar</label>
+   <input type="text" id="pStudent" maxlength="120" placeholder="Nama seperti dalam rekod" autocapitalize="characters">
+   <label for="pPhone">No. telefon waris</label>
+   <input type="tel" id="pPhone" maxlength="20" inputmode="tel" placeholder="cth: 012-3456789">
+   <label for="pFile">Bukti pembayaran</label>
+   <input type="file" id="pFile" accept="image/*,application/pdf">
+   <div class="note" id="pInfo" style="margin-top:8px"></div>
+   <div class="row"><button class="btn" id="pBtn" type="button">Hantar Bukti</button></div>
+   <div id="pRes"></div>
+  </div>
   <div class="mot">“HIDUP BERPANDUKAN ALQURAN”<em>“Akramin: Your Door To The Future”</em></div>
   <p class="note" style="margin-top:8px;color:var(--gold2);font-weight:700">#AkraminD'hati</p>
  </section>
@@ -406,6 +423,28 @@ $('#rf').addEventListener('submit',function(e){e.preventDefault();var res=$('#rR
  if(!CFG){done(false);return}
  fetch(CFG.url+'/rest/v1/rsvp',{method:'POST',headers:{'Content-Type':'application/json',apikey:CFG.key,Authorization:'Bearer '+CFG.key,Prefer:'return=minimal'},body:JSON.stringify(row)})
   .then(function(r){if(!r.ok)throw new Error(r.status);done(true)}).catch(function(){btn.disabled=false;btn.textContent='Hantar Pengesahan';res.innerHTML='<div class="res no">Maaf, penghantaran gagal. Cuba lagi, atau <a style="color:var(--gold2)" target="_blank" rel="noopener" href="'+wa+'">hantar melalui WhatsApp</a>.</div>'})});
+
+/* ---------- bukti pembayaran ---------- */
+function readB64(f){return new Promise(function(res,rej){var r=new FileReader();r.onload=function(){var x=String(r.result);res(x.slice(x.indexOf(',')+1))};r.onerror=function(){rej(new Error('Gagal membaca fail'))};r.readAsDataURL(f)})}
+function shrink(file){return new Promise(function(res,rej){
+ if(file.type==='application/pdf'){if(file.size>1500000)return rej(new Error('PDF melebihi 1.5 MB'));return readB64(file).then(function(d){res({mime:'application/pdf',data:d,fail:file.name})},rej)}
+ if(!/^image\//.test(file.type))return rej(new Error('Hanya gambar atau PDF dibenarkan'));
+ var url=URL.createObjectURL(file),img=new Image();
+ img.onload=function(){var m=1600,k=Math.min(1,m/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(img.width*k));c.height=Math.max(1,Math.round(img.height*k));var g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(img,0,0,c.width,c.height);var d=c.toDataURL('image/jpeg',.8);URL.revokeObjectURL(url);res({mime:'image/jpeg',data:d.slice(d.indexOf(',')+1),fail:file.name.replace(/\.[^.]+$/,'')+'.jpg'})};
+ img.onerror=function(){URL.revokeObjectURL(url);rej(new Error('Gambar tidak dapat dibaca. Cuba tangkapan skrin atau PDF.'))};img.src=url})}
+$('#pStudent').addEventListener('focus',function(){if(!this.value){var v=$('#rStudent').value||$('#sName').value;if(v)this.value=v.toUpperCase()}});
+$('#pFile').addEventListener('change',function(){var f=this.files&&this.files[0];$('#pInfo').textContent=f?f.name+' ('+Math.max(1,Math.round(f.size/1024))+' KB)':''});
+$('#pBtn').addEventListener('click',function(){var out=$('#pRes'),btn=this,st=$('#pStudent').value.trim(),ph=$('#pPhone').value.trim(),f=$('#pFile').files&&$('#pFile').files[0];out.innerHTML='';
+ if(st.split(/\s+/).length<2){out.innerHTML='<div class="res no">Sila isi nama penuh pelajar.</div>';return}
+ if(ph.replace(/\D/g,'').length<9){out.innerHTML='<div class="res no">Sila isi no. telefon waris yang sah.</div>';return}
+ if(!f){out.innerHTML='<div class="res no">Sila pilih fail bukti pembayaran.</div>';return}
+ var wa='https://wa.me/60129187235?text='+encodeURIComponent('Salam, saya hantar bukti pembayaran RM30 untuk '+st.toUpperCase()+' ('+ph+').');
+ if(!CFG){out.innerHTML='<div class="res no">Muat naik terus belum tersedia. Sila <a style="color:var(--gold2)" target="_blank" rel="noopener" href="'+wa+'">hantar bukti melalui WhatsApp</a>.</div>';return}
+ btn.disabled=true;btn.textContent='Menghantar…';
+ shrink(f).then(function(x){return rpc('hantar_bukti',{p_student:st,p_phone:ph,p_fail:x.fail,p_mime:x.mime,p_data:x.data})})
+  .then(function(){out.innerHTML='<div class="res ok"><b>Terima kasih.</b> Bukti pembayaran anda telah diterima.</div>';$('#pFile').value='';$('#pInfo').textContent='';btn.textContent='Hantar Bukti Lain'})
+  .catch(function(e){var m=/Terlalu banyak/.test(e.message)?'Terlalu banyak bukti untuk nama ini. Hubungi Unit Pendaftaran.':(e.message&&!/^\d+$/.test(e.message)?e.message:'Penghantaran gagal.');out.innerHTML='<div class="res no">'+m.replace(/[<>&]/g,'')+' Anda juga boleh <a style="color:var(--gold2)" target="_blank" rel="noopener" href="'+wa+'">hantar melalui WhatsApp</a>.</div>';btn.textContent='Hantar Bukti'})
+  .then(function(){btn.disabled=false})});
 })();
 </script>
 </body>

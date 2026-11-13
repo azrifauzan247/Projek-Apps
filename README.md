@@ -50,3 +50,5 @@ Halaman jemputan bergaya kad kahwin dengan tema laut, muzik latar, gelembung dan
 - **Sandaran tanpa pangkalan data:** `python3 scripts/rsvp-surat.py <folder-pdf>` menyalin PDF ke `public/JemputanHariAnugerahAkramin2026/surat/` dengan nama rawak dan menulis `index.json` (cincang nama sahaja).
 
 **Pautan bersih tanpa `#k=`:** tambah dua pembolehubah repo di GitHub (Settings, Secrets and variables, Actions, tab Variables): `SUPABASE_URL` (alamat asas, tanpa `/rest/v1/`) dan `SUPABASE_ANON_KEY`. Semasa deploy, workflow menulis `config.js` (kunci anon memang awam; keselamatan dijaga oleh RLS dan fungsi berkata laluan). Tiada kunci disimpan dalam git. Tanpa pembolehubah ini, guna pautan dengan `#k=...`.
+
+**Bukti pembayaran RM30:** jalankan `supabase/bukti.sql` sekali (selepas `surat.sql`). Ibu bapa memuat naik resit (gambar atau PDF) di bahagian pembayaran halaman jemputan; gambar dikecilkan di pelayar sebelum dihantar. Admin melihat dan memadam bukti di `/rsvp/admin/`. Jadual tidak boleh dibaca terus; had: 5 bukti setiap nama dan 3000 keseluruhan.
