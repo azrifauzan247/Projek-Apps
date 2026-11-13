@@ -1,10 +1,11 @@
 "use client";
 import { Suspense, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { CalendarClock, Paperclip, Pencil, Plus, Search, Trash2, User, X, Info } from "lucide-react";
+import { CalendarClock, Eye, Paperclip, Pencil, Plus, Search, Trash2, User, X, Info } from "lucide-react";
 import { useApp, call } from "@/lib/store";
 import { Badge, Button, Card, Empty, Input, PageHeader, PriorityBadge, Progress, Select, StatusBadge, Spinner } from "@/components/ui";
 import { TaskForm } from "@/components/TaskForm";
+import { WatchForm } from "@/components/WatchForm";
 import { daysBetween, effStatus, fmtDate, memberName, PRIORITY_ORDER, stats, todayStr, unitName, daysSince } from "@/lib/logic";
 import type { Task } from "@/lib/types";
 
@@ -21,6 +22,8 @@ function Tugasan() {
   const [member, setMember] = useState("");
   const [sort, setSort] = useState("deadline");
   const [edit, setEdit] = useState<Partial<Task> | null>(null);
+  const [watchFor, setWatchFor] = useState<Task | null>(null);
+  const watched = new Set(data.watch.filter((w) => !w.done && w.task_id).map((w) => w.task_id));
   const today = todayStr();
 
   const list = useMemo(() => {
@@ -104,6 +107,7 @@ function Tugasan() {
                     <div className="flex gap-2">
                       {canEdit && <Button size="sm" variant="outline" className="flex-1" onClick={() => setEdit(t)}><Pencil className="size-3.5" />{can.editTasks ? "Sunting" : "Kemas kini"}</Button>}
                       {t.status !== "done" && canEdit && <Button size="sm" variant="primary" onClick={() => run(() => call("PATCH", `/api/r/tasks/${t.id}`, { ...t, status: "done", progress: 100 }), "Ditanda selesai")}>Selesai</Button>}
+                      {data.watchReady && <Button size="sm" variant={watched.has(t.id) ? "gold" : "outline"} aria-label={watched.has(t.id) ? `${t.title} sedang dipantau` : `Pantau ${t.title}`} title={watched.has(t.id) ? "Sedang dalam Pantauan Pengarah" : "Tambah ke Pantauan Pengarah"} onClick={() => setWatchFor(t)}><Eye className="size-3.5" /></Button>}
                       {can.editTasks && <Button size="sm" variant="ghost" aria-label={`Padam ${t.title}`} onClick={() => del(t)} className="text-red-600 hover:!bg-red-50"><Trash2 className="size-4" /></Button>}
                     </div>
                   </div>
@@ -113,6 +117,7 @@ function Tugasan() {
           })}
         </div>
       )}
+      {watchFor && <WatchForm key={watchFor.id} value={{ title: `Pantau: ${watchFor.title}`, task_id: watchFor.id, due_date: watchFor.deadline, priority: watchFor.priority }} onClose={() => setWatchFor(null)} />}
       {edit && <TaskForm key={edit.id ?? "baru"} value={edit} onClose={() => setEdit(null)} />}
     </>
   );

@@ -89,6 +89,11 @@ export const SettingsSchema = z.object({
   stale_days: z.coerce.number().int().min(1).max(60), soon_days: z.coerce.number().int().min(1).max(30),
   wa_template: z.string().trim().min(10, "Templat mesej terlalu pendek").max(3000),
 });
+export const WatchSchema = z.object({
+  title: req("Tajuk pantauan", 200), notes: str(4000).default(""), task_id: nid,
+  owner: z.enum(["Pengarah", "Timbalan Pengarah", "Berdua"]).default("Berdua"),
+  due_date: date, priority: z.enum(["Low", "Medium", "High", "Critical"]).default("Medium"),
+});
 type TaskIn = z.infer<typeof TaskSchema>;
 
 export function zodMessage(e: unknown): string {
@@ -191,6 +196,15 @@ const resources: Record<string, Res> = {
     },
     async remove(rid) { await q(sb().from("checklist").delete().eq("id", rid)); return ok; },
   },
+  watch: {
+    async create(b) { const d = WatchSchema.parse(b); const t = now(); return created("watch_items", { ...d, due_date: d.due_date ?? null, created_by: who(), created_at: t, updated_at: t }); },
+    async update(rid, b) {
+      const bb = b as { done?: unknown };
+      if (typeof bb.done === "boolean") { await q(sb().from("watch_items").update({ done: bb.done ? 1 : 0, done_at: bb.done ? now() : null, done_by: bb.done ? who() : "", updated_at: now() }).eq("id", rid)); return ok; }
+      const d = WatchSchema.parse(b); await q(sb().from("watch_items").update({ ...d, due_date: d.due_date ?? null, updated_at: now() }).eq("id", rid)); return ok;
+    },
+    async remove(rid) { await q(sb().from("watch_items").delete().eq("id", rid)); return ok; },
+  },
   reports: {
     async create(b) {
       const d = z.object({ type: req("Jenis", 40), title: req("Tajuk", 200), payload: z.unknown() }).parse(b);
@@ -259,13 +273,17 @@ async function loadAll(): Promise<AppData> {
     q<Row[]>(sb().from("reports").select("id,type,title,created_by,created_at").order("id", { ascending: false }).limit(100)),
     q<Row[]>(sb().from("settings").select("key,value")),
   ]);
+  // jadual pantauan mungkin belum dibuat; jangan gagalkan seluruh app
+  let watch: Row[] = []; let watchReady = true;
+  try { watch = await q<Row[]>(sb().from("watch_items").select("*").order("id")); }
+  catch (e) { if ((e as Error).message === "SETUP_SQL") watchReady = false; else throw e; }
   const settings = Object.fromEntries(settingRows.filter((r) => r.key !== "seeded").map((r) => [r.key, r.value]));
   const bucket = sb().storage.from("lampiran");
   const me: Me = { id: 0, username: "pengarah", role: "admin", memberId: null, unitId: null, name: who() };
   return {
     me, settings: settings as unknown as AppData["settings"], units, members, tasks,
     attachments: attachments.map((a) => ({ ...a, url: bucket.getPublicUrl(a.stored).data.publicUrl })),
-    taskLog, followups, checklist, reports, users: [],
+    taskLog, followups, checklist, reports, users: [], watch, watchReady,
   } as unknown as AppData;
 }
 

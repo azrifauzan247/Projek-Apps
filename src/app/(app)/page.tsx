@@ -1,10 +1,10 @@
 "use client";
 import Link from "next/link";
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { AlertOctagon, AlarmClock, CheckCircle2, Clock, Hourglass, Layers, ListTodo, Percent, Siren, TimerReset, UserRoundX, Users, Zap, Flag } from "lucide-react";
+import { AlertOctagon, AlarmClock, CheckCircle2, Clock, Hourglass, Layers, ListTodo, Percent, Siren, TimerReset, Eye, UserRoundX, Users, Zap, Flag } from "lucide-react";
 import { useApp } from "@/lib/store";
 import { Badge, Card, CardHeader, Empty, PageHeader, Progress, cn } from "@/components/ui";
-import { attention, daysBetween, daysToEvent, fmtDate, memberName, stats, todayStr, unitName, unitTasks, STATUS_LABEL } from "@/lib/logic";
+import { watchUrgent, attention, daysBetween, daysToEvent, fmtDate, memberName, stats, todayStr, unitName, unitTasks, STATUS_LABEL } from "@/lib/logic";
 import { PRIORITY_LABEL } from "@/lib/logic";
 
 const COLORS = { done: "#10b981", ongoing: "#1a3a7a", pending: "#94a3b8", overdue: "#dc2626" };
@@ -24,6 +24,7 @@ export default function Dashboard() {
   const s = stats(data.tasks);
   const days = daysToEvent(data);
   const att = attention(data);
+  const watchU = watchUrgent(data);
   const today = todayStr();
   const unitsWithData = data.units.filter((u) => !/^penasihat$/i.test(u.name) || unitTasks(data, u).length);
   const perUnit = unitsWithData.map((u) => { const st = stats(unitTasks(data, u)); return { id: u.id, name: u.name, short: u.name.replace(/ \(.*\)/, ""), ...st }; });
@@ -86,6 +87,15 @@ export default function Dashboard() {
             ))}
             {days <= 14 && att.checklistPending > 0 && <Row href="/senarai-semak" main={`${att.checklistPending} item senarai semak majlis belum ditanda`} sub="Kurang 14 hari ke majlis" right={null} />}
           </AttBlock>
+          {data.watchReady && (
+            <div className="lg:col-span-2">
+              <AttBlock tone="navy" icon={Eye} title="Pantauan Pengarah & Timbalan" count={watchU.length} href="/pantauan" empty="Tiada pantauan yang mendesak. Tambah di menu Pantauan Pengarah.">
+                {watchU.slice(0, 4).map((w) => (
+                  <Row key={w.id} href="/pantauan" main={w.title} sub={`${w.owner === "Berdua" ? "Berdua" : w.owner}${w.due_date ? ` · semak ${fmtDate(w.due_date)}` : ""}`} right={w.due_date && daysBetween(todayStr(), w.due_date) < 0 ? <Badge className="bg-red-50 text-red-700 ring-red-200">Lewat</Badge> : null} />
+                ))}
+              </AttBlock>
+            </div>
+          )}
           {att.staleUnits.length > 0 && (
             <div className="lg:col-span-2">
               <AttBlock tone="slate" icon={Clock} title={`Unit Tiada Kemas Kini (≥ ${data.settings.stale_days} hari)`} count={att.staleUnits.length} href="/prestasi" empty="">
