@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { LayoutDashboard, Users, ListChecks, MessageSquareMore, BarChart3, ClipboardCheck, FileText, Settings, Menu, X, Crown, CalendarDays, UserRound, Eye } from "lucide-react";
+import { LayoutDashboard, Users, ListChecks, MessageSquareMore, BarChart3, ClipboardCheck, FileText, Settings, Menu, X, Crown, CalendarDays, UserRound, Eye, FileCheck } from "lucide-react";
 import { useApp } from "@/lib/store";
 import { getWho, setWho } from "@/lib/repo";
 import { Button, Modal, Select } from "./ui";
@@ -20,6 +20,8 @@ const NAV = [
   { href: "/laporan", label: "Laporan", icon: FileText },
   { href: "/tetapan", label: "Tetapan", icon: Settings },
 ];
+// Pautan ke halaman semakan surat jemputan (halaman statik di luar app, baca sahaja untuk guru)
+const SEMAK_URL = `${process.env.NEXT_PUBLIC_BASE_PATH || ""}/rsvp/semak/`;
 
 export default function Shell({ children }: { children: React.ReactNode }) {
   const { data, refresh } = useApp();
@@ -58,6 +60,12 @@ export default function Shell({ children }: { children: React.ReactNode }) {
             </Link>
           );
         })}
+        <a href={SEMAK_URL} target="_blank" rel="noopener noreferrer" onClick={() => setOpen(false)}
+          className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition text-white/70 hover:bg-white/5 hover:text-white">
+          <FileCheck className="size-[18px]" />
+          <span className="flex-1">Semak Surat Jemputan</span>
+          <span className="text-[10px] font-semibold text-gold-400">GURU</span>
+        </a>
       </nav>
       <div className="p-4 border-t border-white/10">
         <button onClick={() => setWhoOpen(true)} className="w-full flex items-center gap-3 text-left rounded-xl hover:bg-white/5 p-1 cursor-pointer" aria-label="Tukar pengguna">
