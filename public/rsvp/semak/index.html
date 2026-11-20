@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Semak Surat Jemputan</title>
+<script src="../../JemputanHariAnugerahAkramin2026/config.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#E3B94F;--gold2:#F6D77E;--aqua:#7FE5DC}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+body{background:linear-gradient(180deg,#0A2F5E,#061A3C 60%,#04122B);color:#F7F3E8;font:500 16px/1.5 Montserrat,sans-serif;min-height:100vh;padding:18px 14px 60px}
+.w{max-width:640px;margin:0 auto}
+h1{font:800 28px/1.2 'Playfair Display',serif;color:var(--gold2)}
+.sub{font:600 12px Montserrat;letter-spacing:.18em;color:var(--aqua);margin:4px 0 14px}
+.card{background:rgba(255,255,255,.07);border:1.5px solid rgba(227,185,79,.55);border-radius:20px;padding:18px;margin:14px 0}
+label{display:block;font:700 12px Montserrat;letter-spacing:.12em;color:var(--aqua);margin:0 0 6px;text-transform:uppercase}
+input{width:100%;font:500 16px Montserrat;color:#fff;background:rgba(255,255,255,.09);border:1.5px solid rgba(227,185,79,.5);border-radius:12px;padding:12px 14px;outline:none}
+input:focus{border-color:var(--gold2)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;cursor:pointer;font:700 15px Montserrat;padding:12px 22px;border-radius:999px;color:#06142E;background:linear-gradient(170deg,#FBE08C,#E3B94F);text-decoration:none}
+.btn.ghost{background:transparent;color:var(--gold2);border:1.5px solid rgba(227,185,79,.8)}
+.btn.sm{padding:9px 16px;font-size:14px}
+.msg{margin-top:12px;padding:12px 14px;border-radius:12px;font:600 14px/1.5 Montserrat}
+.msg.no{background:rgba(255,120,120,.12);border:1.5px solid #ff9b9b}
+.hide{display:none}
+.item{display:flex;align-items:center;gap:10px;justify-content:space-between;padding:12px 4px;border-bottom:1px solid rgba(255,255,255,.12)}
+.item b{font-weight:700;word-break:break-word}
+.item.seen b:after{content:"  ✓";color:var(--aqua)}
+#ov{position:fixed;inset:0;background:#04122B;z-index:99;display:none;flex-direction:column;padding:10px}
+#ov.show{display:flex}
+#ov .top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+#ov .top b{font:700 15px Montserrat;flex:1;min-width:140px}
+#pages{flex:1;min-height:0;overflow:auto;background:#555;border-radius:12px;padding:8px;-webkit-overflow-scrolling:touch}
+#pages canvas{display:block;width:100%;height:auto;margin:0 auto 8px;background:#fff;border-radius:6px}
+.cnt{font:600 14px Montserrat;color:var(--gold2)}
+</style>
+</head>
+<body>
+<div class="w">
+ <h1>Semak Surat Jemputan</h1>
+ <div class="sub">HARI ANUGERAH ASHABUL YAMIN 2026 · UNTUK GURU</div>
+ <div class="card" id="cLogin">
+  <p style="margin-bottom:12px">Semak <b>nama penuh penerima</b> dan <b>kategori anugerah</b> pada setiap surat. Jika ada kesalahan, tekan <b>Lapor Kesalahan</b>.</p>
+  <label for="pw">Kata laluan guru</label>
+  <input type="password" id="pw" autocomplete="current-password" placeholder="Kata laluan daripada urusetia">
+  <div style="margin-top:14px"><button class="btn" id="login">Masuk</button></div>
+  <div id="loginMsg"></div>
+ </div>
+ <div id="app" class="hide">
+  <div class="card">
+   <label for="q">Cari nama</label>
+   <input type="search" id="q" placeholder="Taip sebahagian nama…" autocomplete="off">
+   <div class="cnt" id="cnt" style="margin-top:10px"></div>
+   <div id="list"></div>
+  </div>
+ </div>
+</div>
+<div id="ov">
+ <div class="top"><b id="ovT"></b><span><a class="btn sm ghost" id="ovD" href="#" download>Muat turun</a> <a class="btn sm" id="ovW" target="_blank" rel="noopener" href="#">Lapor Kesalahan</a> <button class="btn sm ghost" id="ovX">Tutup</button></span></div>
+ <div id="pages"></div>
+</div>
+<script>
+(function(){
+'use strict';
+var $=function(s){return document.querySelector(s)};
+var WA='601121030274'; /* nombor untuk laporan kesalahan (Ustaz Azri) */
+var CFG=null;
+(function(){var m=location.hash.match(/[#&]k=([^&]+)/);try{if(m){CFG=JSON.parse(atob(decodeURIComponent(m[1]).replace(/-/g,'+').replace(/_/g,'/')));localStorage.setItem('ay_rsvp_cfg',JSON.stringify(CFG));history.replaceState(null,'',location.pathname)}}catch(e){}
+ if(!CFG){try{CFG=JSON.parse(localStorage.getItem('ay_rsvp_cfg')||'null')}catch(e){}}
+ if((!CFG||!CFG.url||!CFG.key)&&window.RSVP_CONFIG&&window.RSVP_CONFIG.url&&window.RSVP_CONFIG.key)CFG={url:window.RSVP_CONFIG.url,key:window.RSVP_CONFIG.key};
+ if(CFG&&CFG.url)CFG.url=String(CFG.url).replace(/\/rest\/v1\/?$/,'').replace(/\/$/,'')})();
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function norm(s){return (s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toUpperCase().replace(/[^A-Z0-9 ]+/g,' ').replace(/\s+/g,' ').trim()}
+function rpc(fn,args){return fetch(CFG.url+'/rest/v1/rpc/'+fn,{method:'POST',headers:{'Content-Type':'application/json',apikey:CFG.key,Authorization:'Bearer '+CFG.key},body:JSON.stringify(args)}).then(function(r){return r.text().then(function(t){var j=null;try{j=t?JSON.parse(t):null}catch(e){}if(!r.ok)throw new Error((j&&(j.message||j.hint))||('Ralat '+r.status));return j})})}
+var PW='',ROWS=[],SEEN={};try{SEEN=JSON.parse(localStorage.getItem('ay_seen')||'{}')}catch(e){}
+function login(){
+ if(!CFG||!CFG.url||!CFG.key){$('#loginMsg').innerHTML='<div class="msg no">Sambungan belum disediakan. Hubungi urusetia.</div>';return}
+ var p=$('#pw').value;if(!p){$('#loginMsg').innerHTML='<div class="msg no">Isi kata laluan.</div>';return}
+ $('#login').disabled=true;$('#loginMsg').innerHTML='<div class="msg">Menyemak…</div>';
+ rpc('senarai_semak',{p_pass:p}).then(function(r){PW=p;try{sessionStorage.setItem('ay_gpw',p)}catch(e){}$('#cLogin').classList.add('hide');$('#app').classList.remove('hide');ROWS=r||[];draw()})
+  .catch(function(e){$('#login').disabled=false;$('#loginMsg').innerHTML='<div class="msg no">'+esc(/Kata laluan/.test(e.message)?'Kata laluan salah.':'Gagal: '+e.message)+'</div>'})}
+$('#login').addEventListener('click',login);$('#pw').addEventListener('keydown',function(e){if(e.key==='Enter')login()});
+try{var sp=sessionStorage.getItem('ay_gpw');if(sp)$('#pw').value=sp}catch(e){}
+function draw(){var q=norm($('#q').value),rs=ROWS.filter(function(r){return!q||norm(r.nama).indexOf(q)>=0});
+ $('#cnt').textContent=ROWS.length+' surat'+(q?' · '+rs.length+' padanan':'')+' · ditanda ✓ = sudah dibuka';
+ $('#list').innerHTML=rs.map(function(r){return '<div class="item'+(SEEN[r.hash]?' seen':'')+'"><b>'+esc(r.nama)+'</b><button class="btn sm" data-h="'+esc(r.hash)+'">Lihat</button></div>'}).join('')||'<p style="margin-top:10px;opacity:.75">Tiada surat.</p>'}
+$('#q').addEventListener('input',draw);
+/* pdf.js */
+var pdfjsP=null;
+function loadPdfjs(){if(pdfjsP)return pdfjsP;pdfjsP=new Promise(function(res,rej){if(window.pdfjsLib)return res(window.pdfjsLib);var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+ s.onload=function(){window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';res(window.pdfjsLib)};s.onerror=function(){rej(new Error('pdf.js'))};document.head.appendChild(s)});return pdfjsP}
+var curUrl=null;
+function closeOv(){$('#ov').classList.remove('show');$('#pages').innerHTML='';document.body.style.overflow='';if(curUrl){URL.revokeObjectURL(curUrl);curUrl=null}}
+$('#ovX').addEventListener('click',closeOv);
+function b64u8(b64){var bin=atob(b64),n=bin.length,u=new Uint8Array(n);for(var i=0;i<n;i++)u[i]=bin.charCodeAt(i);return u}
+$('#list').addEventListener('click',function(e){var b=e.target.closest('button[data-h]');if(!b)return;var h=b.getAttribute('data-h');b.disabled=true;b.textContent='…';
+ rpc('ambil_semak',{p_pass:PW,p_hash:h}).then(function(r){b.disabled=false;b.textContent='Lihat';if(!r||!r[0]){alert('Surat tidak ditemui.');return}
+  var x=r[0],u8=b64u8(x.data);SEEN[h]=1;try{localStorage.setItem('ay_seen',JSON.stringify(SEEN))}catch(er){}draw();
+  var blob=new Blob([u8],{type:'application/pdf'});curUrl=URL.createObjectURL(blob);
+  $('#ovT').textContent=x.nama;var d=$('#ovD');d.href=curUrl;d.setAttribute('download',(x.fail||'surat')+(/\.pdf$/i.test(x.fail||'')?'':'.pdf'));
+  $('#ovW').href='https://wa.me/'+WA+'?text='+encodeURIComponent('Salam, semakan surat jemputan penerima anugerah.\nNama pada surat: '+x.nama+'\nKesalahan: ');
+  $('#pages').innerHTML='<p style="color:#fff;padding:14px">Memuatkan surat…</p>';$('#ov').classList.add('show');document.body.style.overflow='hidden';
+  loadPdfjs().then(function(lib){return lib.getDocument({data:u8.slice()}).promise}).then(function(doc){var host=$('#pages');host.innerHTML='';var chain=Promise.resolve();
+   for(var p=1;p<=doc.numPages;p++)(function(pn){chain=chain.then(function(){return doc.getPage(pn).then(function(pg){var w=Math.min(host.clientWidth-16,900),vp0=pg.getViewport({scale:1}),sc=(w/vp0.width)*Math.min(window.devicePixelRatio||1,2.5),vp=pg.getViewport({scale:sc});var c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;host.appendChild(c);return pg.render({canvasContext:c.getContext('2d'),viewport:vp}).promise})})})(p)})
+  .catch(function(){$('#pages').innerHTML='<p style="color:#fff;padding:14px">Surat tidak dapat dipaparkan di sini. Tekan <b>Muat turun</b> untuk membukanya.</p>'})
+ }).catch(function(er){b.disabled=false;b.textContent='Lihat';alert('Gagal: '+er.message)})});
+})();
+</script>
+</body>
+</html>
