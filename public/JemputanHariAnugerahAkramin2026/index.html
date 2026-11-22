@@ -265,9 +265,9 @@ footer{position:relative;z-index:10;text-align:center;padding:0 20px 120px;font:
  <section class="sec" id="surat">
   <div class="orn"><i></i><b>✦</b><i></i></div>
   <h2>Surat Jemputan</h2><div class="sub">MUAT TURUN MENGIKUT NAMA PELAJAR</div>
-  <p class="note" style="margin-top:0">Surat jemputan disediakan khusus untuk setiap pelajar. Taip <b>nama penuh pelajar</b> seperti dalam rekod sekolah.</p>
-  <label for="sName">Nama penuh pelajar</label>
-  <input type="text" id="sName" placeholder="cth: AHMAD BIN ABDULLAH" autocomplete="off" autocapitalize="characters">
+  <p class="note" style="margin-top:0">Surat jemputan disediakan khusus untuk setiap pelajar. Taip <b>nama pelajar</b> (nama penuh atau nama pertama sahaja).</p>
+  <label for="sName">Nama pelajar</label>
+  <input type="text" id="sName" placeholder="cth: Falisha atau nama penuh" autocomplete="off" autocapitalize="characters">
   <div class="row"><button class="btn" id="sBtn">Cari Surat</button></div>
   <div id="sRes"></div>
  </section>
@@ -408,25 +408,28 @@ function norm(s){var skip={BIN:1,BINTI:1,BT:1,BTE:1,B:1};return (s||'').normaliz
 var SALT='ay2026|';
 
 /* ---------- surat jemputan ---------- */
-var idx=null;
-function loadIdx(){if(idx)return Promise.resolve(idx);return fetch('surat/index.json',{cache:'no-store'}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){idx=j;return j}).catch(function(){idx={};return idx})}
-function rpc(fn,args){return fetch(CFG.url+'/rest/v1/rpc/'+fn,{method:'POST',headers:{'Content-Type':'application/json',apikey:CFG.key,Authorization:'Bearer '+CFG.key},body:JSON.stringify(args)}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})}
+function rpc(fn,args){return fetch(CFG.url+'/rest/v1/rpc/'+fn,{method:'POST',headers:{'Content-Type':'application/json',apikey:CFG.key,Authorization:'Bearer '+CFG.key},body:JSON.stringify(args)}).then(function(r){return r.text().then(function(t){var j=null;try{j=t?JSON.parse(t):null}catch(e){}if(!r.ok)throw new Error((j&&(j.message||j.hint))||('Ralat '+r.status));return j})})}
 function b64blob(b64,type){var bin=atob(b64),n=bin.length,u=new Uint8Array(n);for(var i=0;i<n;i++)u[i]=bin.charCodeAt(i);return new Blob([u],{type:type||'application/pdf'})}
 function fileName(disp){return 'Surat-Jemputan-'+disp.replace(/[^A-Z0-9 ]+/g,'').replace(/ /g,'-')+'.pdf'}
-function lookup(h,n){
- /* 1) pangkalan data (muat naik admin)  2) fail statik surat/index.json (sandaran) */
- var first=CFG?rpc('ambil_surat',{p_hash:h}).then(function(rows){return rows&&rows[0]?{kind:'db',row:rows[0]}:null}).catch(function(){return null}):Promise.resolve(null);
- return first.then(function(r){if(r)return r;return loadIdx().then(function(j){var f=j[h];return f?{kind:'file',file:f}:null})})}
-function findLetter(){var raw=$('#sName').value,n=norm(raw),out=$('#sRes');if(n.split(' ').length<2){out.innerHTML='<div class="res no">Sila taip nama penuh pelajar (sekurang-kurangnya dua perkataan).</div>';return}
+function tokens(raw){var seen={},out=[];norm(raw).split(' ').forEach(function(t){if(t&&!seen[t]){seen[t]=1;out.push(t)}});return out}
+var FOUND={};
+function findLetter(){var raw=$('#sName').value,tk=tokens(raw),out=$('#sRes');
+ if(!tk.length){out.innerHTML='<div class="res no">Sila taip nama pelajar (nama penuh atau sebahagian nama).</div>';return}
+ if(tk.length>6)tk=tk.slice(0,6);
+ if(!CFG){out.innerHTML='<div class="res no">Carian belum tersedia. Hubungi Unit Pendaftaran di bawah.</div>';return}
  out.innerHTML='<div class="res">Mencari…</div>';
- lookup(sha256(SALT+n),n).then(function(r){
-  if(!r){out.innerHTML='<div class="res no">Nama tidak ditemui. Semak ejaan nama penuh, atau surat belum tersedia. Hubungi Unit Pendaftaran di bawah jika perlu.</div>';return}
-  var disp=raw.trim().replace(/\s+/g,' ').toUpperCase(),fname=fileName(disp);
-  out.innerHTML='<div class="res ok">Surat jemputan untuk <b></b> ditemui.<div class="row"><a class="btn" id="dlBtn" href="#">Muat Turun PDF</a></div></div>';out.querySelector('b').textContent=disp;
-  var a=$('#dlBtn');
-  if(r.kind==='file'){a.href='surat/'+r.file;a.setAttribute('download',fname)}
-  else a.addEventListener('click',function(e){e.preventDefault();var u=URL.createObjectURL(b64blob(r.row.data));var l=document.createElement('a');l.href=u;l.download=fname;document.body.appendChild(l);l.click();l.remove();setTimeout(function(){URL.revokeObjectURL(u)},4000)});
-  if(!$('#rStudent').value)$('#rStudent').value=disp})}
+ rpc('cari_surat',{p_tokens:tk.map(function(t){return sha256(SALT+t)})}).then(function(rows){rows=rows||[];
+  if(!rows.length){out.innerHTML='<div class="res no">Tiada surat dijumpai untuk <b></b>. Cuba nama lain (contohnya nama pertama), semak ejaan, atau surat belum tersedia. Hubungi Unit Pendaftaran di bawah jika perlu.</div>';out.querySelector('b').textContent=raw.trim();return}
+  var h='<div class="res ok">'+(rows.length===1?'Satu surat dijumpai.':rows.length+' surat dijumpai. Pilih nama anak anda:')+'<div style="margin-top:10px">';
+  rows.forEach(function(r,i){FOUND[r.hash]=r;h+='<div style="display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid rgba(255,255,255,.15)"><b id="fn'+i+'" style="text-align:left"></b><button class="btn small" data-h="'+r.hash+'" style="flex:none">Muat Turun PDF</button></div>'});
+  out.innerHTML=h+'</div>'+(rows.length>=10?'<div style="margin-top:8px;font-size:13px">Terlalu banyak padanan. Taip nama yang lebih lengkap untuk memudahkan.</div>':'')+'</div>';
+  rows.forEach(function(r,i){$('#fn'+i).textContent=r.nama+(r.kod?' ('+r.kod+')':'')});
+  if(rows.length===1&&!$('#rStudent').value)$('#rStudent').value=rows[0].nama})
+ .catch(function(e){out.innerHTML='<div class="res no">Carian gagal ('+String(e.message||e).replace(/[<>&]/g,'')+'). Cuba lagi, atau hubungi Unit Pendaftaran di bawah.</div>'})}
+$('#sRes').addEventListener('click',function(e){var b=e.target.closest('button[data-h]');if(!b)return;var h=b.getAttribute('data-h'),r=FOUND[h],t=b.textContent;b.disabled=true;b.textContent='…';
+ rpc('ambil_surat',{p_hash:h}).then(function(rows){b.disabled=false;b.textContent=t;if(!rows||!rows[0]){alert('Surat tidak ditemui.');return}
+  var u=URL.createObjectURL(b64blob(rows[0].data)),l=document.createElement('a'),disp=(r.nama+(r.kod?' '+r.kod:'')).toUpperCase();l.href=u;l.download=fileName(disp);document.body.appendChild(l);l.click();l.remove();setTimeout(function(){URL.revokeObjectURL(u)},4000)})
+  .catch(function(er){b.disabled=false;b.textContent=t;alert('Gagal memuat turun: '+er.message)})});
 $('#sBtn').addEventListener('click',findLetter);$('#sName').addEventListener('keydown',function(e){if(e.key==='Enter')findLetter()});
 
 /* ---------- RSVP ---------- */
@@ -440,7 +443,7 @@ $('#rf').addEventListener('submit',function(e){e.preventDefault();var res=$('#rR
  if($('#rWeb').value){return}
  var st=$('#rStudent').value.trim(),gd=$('#rGuard').value.trim(),ph=$('#rPhone').value.trim(),att=document.querySelector('input[name=att]:checked').value==='hadir',
   paid=document.querySelector('input[name=paid]:checked').value,un=$('#rUnit').value.trim(),nt=$('#rNote').value.trim(),gs=Math.max(1,Math.min(12,parseInt($('#rGuests').value,10)||1));
- if(st.split(/\s+/).length<2){res.innerHTML='<div class="res no">Sila isi nama penuh pelajar.</div>';return}
+ if(st.length<3){res.innerHTML='<div class="res no">Sila isi nama pelajar.</div>';return}
  if(!gd){res.innerHTML='<div class="res no">Sila isi nama ibu bapa / penjaga.</div>';return}
  if(ph.replace(/\D/g,'').length<9){res.innerHTML='<div class="res no">Sila isi no. telefon yang sah.</div>';return}
  var row={student:st.toUpperCase(),unit:un,guardian:gd,phone:ph,attending:att,guests:att?gs:0,paid:paid,note:nt};
@@ -464,7 +467,7 @@ function shrink(file){return new Promise(function(res,rej){
 $('#pStudent').addEventListener('focus',function(){if(!this.value){var v=$('#rStudent').value||$('#sName').value;if(v)this.value=v.toUpperCase()}});
 $('#pFile').addEventListener('change',function(){var f=this.files&&this.files[0];$('#pInfo').textContent=f?f.name+' ('+Math.max(1,Math.round(f.size/1024))+' KB)':''});
 $('#pBtn').addEventListener('click',function(){var out=$('#pRes'),btn=this,st=$('#pStudent').value.trim(),ph=$('#pPhone').value.trim(),f=$('#pFile').files&&$('#pFile').files[0];out.innerHTML='';
- if(st.split(/\s+/).length<2){out.innerHTML='<div class="res no">Sila isi nama penuh pelajar.</div>';return}
+ if(st.length<3){out.innerHTML='<div class="res no">Sila isi nama pelajar.</div>';return}
  if(ph.replace(/\D/g,'').length<9){out.innerHTML='<div class="res no">Sila isi no. telefon waris yang sah.</div>';return}
  if(!f){out.innerHTML='<div class="res no">Sila pilih fail bukti pembayaran.</div>';return}
  var wa='https://wa.me/60129187235?text='+encodeURIComponent('Salam, saya hantar bukti pembayaran RM30 untuk '+st.toUpperCase()+' ('+ph+').');

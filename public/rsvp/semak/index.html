@@ -84,7 +84,7 @@ $('#login').addEventListener('click',login);$('#pw').addEventListener('keydown',
 try{var sp=sessionStorage.getItem('ay_gpw');if(sp)$('#pw').value=sp}catch(e){}
 function draw(){var q=norm($('#q').value),rs=ROWS.filter(function(r){return!q||norm(r.nama).indexOf(q)>=0});
  $('#cnt').textContent=ROWS.length+' surat'+(q?' · '+rs.length+' padanan':'')+' · ditanda ✓ = sudah dibuka';
- $('#list').innerHTML=rs.map(function(r){return '<div class="item'+(SEEN[r.hash]?' seen':'')+'"><b>'+esc(r.nama)+'</b><button class="btn sm" data-h="'+esc(r.hash)+'">Lihat</button></div>'}).join('')||'<p style="margin-top:10px;opacity:.75">Tiada surat.</p>'}
+ $('#list').innerHTML=rs.map(function(r){return '<div class="item'+(SEEN[r.hash]?' seen':'')+'"><span><b>'+esc(r.nama)+'</b><small style="display:block;font-size:12px;opacity:.7;font-weight:500">'+esc(r.fail||'')+'</small></span><button class="btn sm" data-h="'+esc(r.hash)+'">Lihat</button></div>'}).join('')||'<p style="margin-top:10px;opacity:.75">Tiada surat.</p>'}
 $('#q').addEventListener('input',draw);
 /* pdf.js */
 var pdfjsP=null;
