@@ -82,7 +82,7 @@ small.h{display:block;opacity:.75;font-weight:500;font-size:13px}
   <div class="card">
    <h2>3. Surat yang telah dimuat naik <span id="cnt" style="opacity:.7"></span></h2>
    <input type="search" id="q" placeholder="Cari nama…">
-   <div style="margin-top:10px"><button class="btn ghost sm" id="reload">Muat semula</button></div>
+   <div style="margin-top:10px"><button class="btn ghost sm" id="reload">Muat semula</button> <button class="btn ghost sm" id="rebuild">Bina carian untuk surat sedia ada</button></div><div id="rbMsg"></div>
    <div id="list"></div>
   </div>
  </div>
@@ -134,7 +134,11 @@ function draw(){var q=norm($('#q').value),h='';var rs=rowsAll.filter(function(r)
  h='<table><tr><th>NAMA</th><th>SAIZ</th><th></th></tr>';rs.forEach(function(r){h+='<tr><td class="n">'+esc(r.nama)+'<small class="h">'+esc(r.fail||'')+'</small></td><td>'+kb(r.saiz||0)+'</td><td><button class="btn del sm" data-h="'+esc(r.hash)+'" data-n="'+esc(r.nama)+'">Padam</button></td></tr>'});
  $('#list').innerHTML=h+'</table>'}
 function reload(){return rpc('senarai_surat',{p_pass:PW}).then(render).catch(function(e){alert('Gagal memuat semula: '+e.message)})}
-$('#reload').addEventListener('click',reload);$('#q').addEventListener('input',draw);
+$('#reload').addEventListener('click',reload);
+$('#rebuild').addEventListener('click',function(){var b=this;if(!rowsAll.length){alert('Tiada surat.');return}b.disabled=true;var i=0,ok=0,bad=0;$('#rbMsg').innerHTML='<div class="msg">Membina carian…</div>';
+ (function nx(){if(i>=rowsAll.length){b.disabled=false;$('#rbMsg').innerHTML='<div class="msg '+(bad?'no':'ok')+'">Selesai: '+ok+' surat dikemas kini'+(bad?', '+bad+' gagal':'')+'. Kini boleh dicari dengan nama pelajar.</div>';reload();return}
+  var r=rowsAll[i++],pr=parseNama(r.fail||r.nama);
+  rpc('simpan_token',{p_pass:PW,p_hash:r.hash,p_nama:pr.nama||r.nama,p_kod:pr.kod,p_tokens:hashTokens(pr.nama||r.nama,pr.kod)}).then(function(){ok++}).catch(function(){bad++}).then(nx)})()});$('#q').addEventListener('input',draw);
 $('#list').addEventListener('click',function(e){var b=e.target.closest('button[data-h]');if(!b)return;if(!confirm('Padam surat untuk '+b.getAttribute('data-n')+'?'))return;
  rpc('padam_surat',{p_pass:PW,p_hash:b.getAttribute('data-h')}).then(reload).catch(function(er){alert('Gagal memadam: '+er.message)})});
 
@@ -145,22 +149,24 @@ $('#drop').addEventListener('click',function(){$('#files').click()});
 ['dragleave','drop'].forEach(function(ev){$('#drop').addEventListener(ev,function(e){e.preventDefault();this.classList.remove('over')})});
 $('#drop').addEventListener('drop',function(e){add(e.dataTransfer.files)});
 $('#files').addEventListener('change',function(){add(this.files);this.value=''});
-function add(fl){Array.prototype.forEach.call(fl,function(f){var nm=f.name.replace(/\.pdf$/i,''),n=norm(nm),st='ready',note='';
+function parseNama(stem){var s=String(stem||'').replace(/\.pdf$/i,'').trim();s=s.replace(/^\s*surat[^-\u2013\u2014]*[-\u2013\u2014]\s*/i,'');var kod='',m=s.match(/\(([^)]*)\)\s*$/);if(m){kod=m[1].trim();s=s.slice(0,m.index).trim()}return{nama:s.replace(/\s+/g,' ').toUpperCase(),kod:kod.toUpperCase()}}
+function hashTokens(nama,kod){var seen={},out=[];norm(nama+' '+kod).split(' ').forEach(function(t){if(t&&!seen[t]){seen[t]=1;out.push(sha256(SALT+t))}});return out}
+function add(fl){Array.prototype.forEach.call(fl,function(f){var stem=f.name.replace(/\.pdf$/i,''),pr=parseNama(stem),nm=pr.nama,n=norm(nm),st='ready',note='';
   if(!/\.pdf$/i.test(f.name)&&f.type!=='application/pdf'){st='bad';note='Bukan PDF'}
-  else if(n.split(' ').length<2){st='bad';note='Nama terlalu pendek (perlu nama penuh)'}
+  else if(n.length<2){st='bad';note='Tiada nama dapat dibaca daripada nama fail'}
   else if(f.size>MAX){st='bad';note='Melebihi 2 MB'}
-  var hash=sha256(SALT+n);if(Q.some(function(x){return x.hash===hash}))if(st==='ready'){st='bad';note='Nama berganda dalam senarai'}
-  Q.push({f:f,name:nm,hash:hash,st:st,note:note})});drawQ()}
-function drawQ(){var h='',ok=0;if(Q.length){h='<table><tr><th>NAMA (DARIPADA NAMA FAIL)</th><th>SAIZ</th><th>STATUS</th></tr>';Q.forEach(function(x){if(x.st==='ready'||x.st==='done'||x.st==='up')ok+=x.st==='ready'?1:0;
+  var hash=sha256(SALT+'f|'+norm(stem));if(Q.some(function(x){return x.hash===hash}))if(st==='ready'){st='bad';note='Fail berganda dalam senarai'}
+  Q.push({f:f,name:nm,kod:pr.kod,tokens:hashTokens(nm,pr.kod),hash:hash,st:st,note:note})});drawQ()}
+function drawQ(){var h='',ok=0;if(Q.length){h='<table><tr><th>NAMA YANG DIBACA</th><th>SAIZ</th><th>STATUS</th></tr>';Q.forEach(function(x){if(x.st==='ready'||x.st==='done'||x.st==='up')ok+=x.st==='ready'?1:0;
   var s=x.st==='done'?'<span class="st-ok">Selesai</span>':x.st==='up'?'<span class="st-w">Memuat naik…</span>':x.st==='err'?'<span class="st-no">'+esc(x.note)+'</span>':x.st==='bad'?'<span class="st-no">'+esc(x.note)+'</span>':'<span class="st-w">Sedia</span>';
-  h+='<tr><td class="n">'+esc(x.name.toUpperCase())+'</td><td>'+kb(x.f.size)+'</td><td>'+s+'</td></tr>'});h+='</table>'}
+  h+='<tr><td class="n">'+esc(x.name)+(x.kod?' <span style="opacity:.75">('+esc(x.kod)+')</span>':'')+'<small class="h">'+esc(x.f.name)+'</small></td><td>'+kb(x.f.size)+'</td><td>'+s+'</td></tr>'});h+='</table>'}
  $('#queue').innerHTML=h;$('#qAct').style.display=Q.length?'block':'none';$('#go').disabled=!Q.some(function(x){return x.st==='ready'||x.st==='err'})}
 $('#clr').addEventListener('click',function(){Q=[];$('#pb').style.width='0';$('#upMsg').innerHTML='';drawQ()});
 function b64(file){return new Promise(function(res,rej){var r=new FileReader();r.onload=function(){var s=String(r.result);res(s.slice(s.indexOf(',')+1))};r.onerror=function(){rej(new Error('Gagal membaca fail'))};r.readAsDataURL(file)})}
 $('#go').addEventListener('click',function(){var todo=Q.filter(function(x){return x.st==='ready'||x.st==='err'}),i=0,okc=0,fail=0;if(!todo.length)return;$('#go').disabled=true;$('#upMsg').innerHTML='';
  (function next(){if(i>=todo.length){$('#pb').style.width='100%';$('#upMsg').innerHTML='<div class="msg '+(fail?'no':'ok')+'">Selesai: '+okc+' berjaya'+(fail?', '+fail+' gagal (lihat status)':'')+'.</div>';drawQ();reload();return}
   var x=todo[i];x.st='up';drawQ();
-  b64(x.f).then(function(d){return rpc('simpan_surat',{p_pass:PW,p_hash:x.hash,p_nama:x.name.toUpperCase(),p_fail:x.f.name,p_data:d})})
+  b64(x.f).then(function(d){return rpc('simpan_surat2',{p_pass:PW,p_hash:x.hash,p_nama:x.name,p_kod:x.kod,p_tokens:x.tokens,p_fail:x.f.name,p_data:d})})
    .then(function(){x.st='done';okc++}).catch(function(e){x.st='err';x.note=e.message;fail++})
    .then(function(){i++;$('#pb').style.width=Math.round(i/todo.length*100)+'%';next()})})()});
 
