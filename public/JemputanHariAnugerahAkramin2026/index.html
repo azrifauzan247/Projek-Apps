@@ -90,6 +90,8 @@ main{position:relative;z-index:10;max-width:560px;margin:0 auto;padding:22px 16p
 .tl .tm{font:700 13px Montserrat;letter-spacing:.08em;color:var(--gold2)}
 .tl .tt{font:600 16px/1.4 Montserrat}
 .tl .tt small{display:block;font:500 13px/1.5 Montserrat;opacity:.85}
+.tl li.grp .tm{font:800 14px Montserrat;letter-spacing:.12em;color:var(--aqua)}.tl li.grp .tt small{font:600 13px Montserrat;color:var(--gold2);opacity:1}
+.tl li.grp:before{background:radial-gradient(circle at 35% 30%,#fff,var(--aqua) 60%,#0E8C9A);width:20px;height:20px;left:3px}
 .tl li.perf:before{background:radial-gradient(circle at 35% 30%,#fff,var(--aqua) 60%,#0E8C9A);box-shadow:0 0 12px rgba(127,229,220,.8)}
 .tl li.perf .tt{color:var(--aqua)}
 .pay{margin-top:14px;padding:20px;border-radius:22px;background:rgba(227,185,79,.1);border:2px solid rgba(227,185,79,.7);text-align:center}
@@ -187,20 +189,39 @@ footer{position:relative;z-index:10;text-align:center;padding:0 20px 120px;font:
   <div class="orn"><i></i><b>✦</b><i></i></div>
   <h2>Tentatif Majlis</h2><div class="sub">ATUR CARA</div>
   <ul class="tl">
-   <li><div class="tm">7.00 – 7.30 PAGI</div><div class="tt">Kehadiran guru</div></li>
-   <li><div class="tm">7.30 – 7.50 PAGI</div><div class="tt">Kehadiran ibu bapa dan murid<small>Pendaftaran pelajar</small></div></li>
-   <li><div class="tm">7.50 – 8.00 PAGI</div><div class="tt">Ketibaan VIP dan Perasmi</div></li>
-   <li><div class="tm">8.00 – 9.00 PAGI</div><div class="tt">Majlis Perasmian<small>Kata alu-aluan · Nyanyian Asmaul Husna · Lagu Ashabul Yamin · Bacaan doa · Bacaan surah · Ucapan Pengusaha · Ucapan Perasmi · Gimik perasmian</small></div></li>
-   <li><div class="tm">9.00 PAGI – 12.00 TGH</div><div class="tt">Majlis Penyampaian Anugerah<small>1 Kecemerlangan Taska/Tadika · 2 Kecemerlangan AKRAMIN</small></div></li>
-   <li class="perf"><div class="tm">PERSEMBAHAN</div><div class="tt">Choral Speaking (Tadika Ampang)</div></li>
-   <li><div class="tm">ANUGERAH 3 – 9</div><div class="tt"><small>Bintang Cilik &amp; Gigi Tercantik · Naik Al-Quran · Cemerlang Membaca · Tamat Juzuk 30 · Pra Syahadah · Kelas Ceria · Unit Terbaik</small></div></li>
-   <li class="perf"><div class="tm">PERSEMBAHAN</div><div class="tt">Nasyid (AKRAMIN Ampang)</div></li>
-   <li><div class="tm">ANUGERAH 10 – 13</div><div class="tt"><small>Waris Inspirasi · Guru Terbaik · Pelajar Istiqomah · Konvokesyen</small></div></li>
-   <li class="perf"><div class="tm">PERSEMBAHAN</div><div class="tt">Persembahan 6Y</div></li>
-   <li><div class="tm">ANUGERAH 14</div><div class="tt">Khas Tokoh Pelajar</div></li>
+   <li><div class="tm">7.00 – 7.30 (30 min)</div><div class="tt">Kehadiran guru</div></li>
+   <li><div class="tm">7.30 – 7.50 (20 min)</div><div class="tt">Kehadiran ibu bapa dan murid<small>Pendaftaran pelajar</small></div></li>
+   <li><div class="tm">7.50 – 8.00 (10 min)</div><div class="tt">Ketibaan VIP dan Perasmi</div></li>
+   <li class="grp"><div class="tm">MAJLIS PERASMIAN</div><div class="tt"><small>8.00 – 9.00 pagi</small></div></li>
+   <li><div class="tm">8.00 – 8.05 (5 min)</div><div class="tt">Kata alu-aluan</div></li>
+   <li><div class="tm">8.05 – 8.10 (5 min)</div><div class="tt">Nyanyian Asmaul Husna</div></li>
+   <li><div class="tm">8.10 – 8.15 (5 min)</div><div class="tt">Nyanyian Lagu Ashabul Yamin</div></li>
+   <li><div class="tm">8.15 – 8.20 (5 min)</div><div class="tt">Bacaan doa (pelajar AKRAMIN)</div></li>
+   <li><div class="tm">8.20 – 8.25 (5 min)</div><div class="tt">Bacaan surah (pelajar Tadika, juara HAKIM)</div></li>
+   <li><div class="tm">8.25 – 8.35 (10 min)</div><div class="tt">Ucapan Pengusaha</div></li>
+   <li><div class="tm">8.35 – 8.50 (15 min)</div><div class="tt">Ucapan Perasmi</div></li>
+   <li><div class="tm">8.50 – 9.00 (10 min)</div><div class="tt">Gimik perasmian</div></li>
+   <li class="grp"><div class="tm">MAJLIS PENYAMPAIAN ANUGERAH</div><div class="tt"><small>9.00 pagi – 12.00 tengah hari</small></div></li>
+   <li><div class="tm">9.00 – 9.25 (25 min)</div><div class="tt">1 · Kecemerlangan Taska/Tadika</div></li>
+   <li><div class="tm">9.25 – 9.45 (20 min)</div><div class="tt">2 · Kecemerlangan AKRAMIN</div></li>
+   <li class="perf"><div class="tm">9.45 – 9.52 (7 min)</div><div class="tt">Choral Speaking (Tadika Ampang)</div></li>
+   <li><div class="tm">9.52 – 10.02 (10 min)</div><div class="tt">3 · Bintang Cilik &amp; Gigi Tercantik</div></li>
+   <li><div class="tm">10.02 – 10.12 (10 min)</div><div class="tt">4 · Naik Al-Quran</div></li>
+   <li><div class="tm">10.12 – 10.22 (10 min)</div><div class="tt">5 · Cemerlang Membaca</div></li>
+   <li><div class="tm">10.22 – 10.30 (8 min)</div><div class="tt">6 · Tamat Juzuk 30</div></li>
+   <li><div class="tm">10.30 – 10.38 (8 min)</div><div class="tt">7 · Pra Syahadah</div></li>
+   <li><div class="tm">10.38 – 10.44 (6 min)</div><div class="tt">8 · Kelas Ceria</div></li>
+   <li><div class="tm">10.44 – 10.50 (6 min)</div><div class="tt">9 · Unit Terbaik</div></li>
+   <li class="perf"><div class="tm">10.50 – 10.57 (7 min)</div><div class="tt">Nasyid (AKRAMIN Ampang)</div></li>
+   <li><div class="tm">10.57 – 11.05 (8 min)</div><div class="tt">10 · Waris Inspirasi</div></li>
+   <li><div class="tm">11.05 – 11.11 (6 min)</div><div class="tt">11 · Guru Terbaik</div></li>
+   <li><div class="tm">11.11 – 11.26 (15 min)</div><div class="tt">12 · Pelajar Istiqomah</div></li>
+   <li><div class="tm">11.26 – 11.38 (12 min)</div><div class="tt">13 · Konvokesyen</div></li>
+   <li><div class="tm">11.38 – 11.45 (7 min)</div><div class="tt">14 · Khas Tokoh Pelajar</div></li>
+   <li class="perf"><div class="tm">11.45 – 12.00 (15 min)</div><div class="tt">Persembahan 6Y</div></li>
    <li><div class="tm">12.00 TENGAH HARI</div><div class="tt">Bersurai</div></li>
   </ul>
-  <p class="note" style="margin-top:4px">Tentatif ini tertakluk kepada perubahan.</p>
+  <p class="note" style="margin-top:4px">Tentatif ini tertakluk kepada perubahan.<br>Sebarang perubahan akan dimaklumkan oleh Unit Atur Cara &amp; Persembahan.</p>
  </section>
 
  <section class="sec" id="bayaran">
