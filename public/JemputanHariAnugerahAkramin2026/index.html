@@ -413,12 +413,11 @@ function b64blob(b64,type){var bin=atob(b64),n=bin.length,u=new Uint8Array(n);fo
 function fileName(disp){return 'Surat-Jemputan-'+disp.replace(/[^A-Z0-9 ]+/g,'').replace(/ /g,'-')+'.pdf'}
 function tokens(raw){var seen={},out=[];norm(raw).split(' ').forEach(function(t){if(t&&!seen[t]){seen[t]=1;out.push(t)}});return out}
 var FOUND={};
-function findLetter(){var raw=$('#sName').value,tk=tokens(raw),out=$('#sRes');
- if(!tk.length){out.innerHTML='<div class="res no">Sila taip nama pelajar (nama penuh atau sebahagian nama).</div>';return}
- if(tk.length>6)tk=tk.slice(0,6);
+function findLetter(){var raw=$('#sName').value,out=$('#sRes');
+ if(raw.replace(/[^A-Za-z0-9]/g,'').length<3){out.innerHTML='<div class="res no">Sila taip sekurang-kurangnya 3 huruf nama pelajar (satu perkataan pun cukup).</div>';return}
  if(!CFG){out.innerHTML='<div class="res no">Carian belum tersedia. Hubungi Unit Pendaftaran di bawah.</div>';return}
  out.innerHTML='<div class="res">Mencari…</div>';
- rpc('cari_surat',{p_tokens:tk.map(function(t){return sha256(SALT+t)})}).then(function(rows){rows=rows||[];
+ rpc('cari_surat3',{p_q:raw}).then(function(rows){rows=rows||[];
   if(!rows.length){out.innerHTML='<div class="res no">Tiada surat dijumpai untuk <b></b>. Cuba nama lain (contohnya nama pertama), semak ejaan, atau surat belum tersedia. Hubungi Unit Pendaftaran di bawah jika perlu.</div>';out.querySelector('b').textContent=raw.trim();return}
   var h='<div class="res ok">'+(rows.length===1?'Satu surat dijumpai.':rows.length+' surat dijumpai. Pilih nama anak anda:')+'<div style="margin-top:10px">';
   rows.forEach(function(r,i){FOUND[r.hash]=r;h+='<div style="display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid rgba(255,255,255,.15)"><b id="fn'+i+'" style="text-align:left"></b><button class="btn small" data-h="'+r.hash+'" style="flex:none">Muat Turun PDF</button></div>'});
