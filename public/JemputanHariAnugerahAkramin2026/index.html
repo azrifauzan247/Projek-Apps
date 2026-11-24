@@ -296,7 +296,7 @@ footer{position:relative;z-index:10;text-align:center;padding:0 20px 120px;font:
    <div class="row" style="margin-top:22px"><button class="btn" id="rBtn" type="submit">Hantar Pengesahan</button></div>
    <div id="rRes"></div>
   </form>
-  <div class="thanks" id="thanks"><div class="script">Terima Kasih</div><p class="note" id="thMsg"></p><div class="row"><a class="btn small" id="waBtn" target="_blank" rel="noopener" href="#">Hantar juga melalui WhatsApp (Unit Pendaftaran)</a></div></div>
+  <div class="thanks" id="thanks"><div class="script">Terima Kasih</div><p class="note" id="thMsg"></p></div>
  </section>
 
  <section class="sec c">
@@ -442,13 +442,12 @@ $('#rf').addEventListener('submit',function(e){e.preventDefault();var res=$('#rR
  if(ph.replace(/\D/g,'').length<9){res.innerHTML='<div class="res no">Sila isi no. telefon yang sah.</div>';return}
  var row={student:st.toUpperCase(),unit:un,guardian:gd,phone:ph,attending:att,guests:att?gs:0,paid:paid,note:nt};
  var btn=$('#rBtn');btn.disabled=true;btn.textContent='Menghantar…';
- var wa='https://wa.me/60129187235?text='+encodeURIComponent('Salam, pengesahan kehadiran Hari Anugerah Ashabul Yamin 2026.\nPelajar: '+row.student+'\nUnit/Kelas: '+(un||'-')+'\nWaris: '+gd+' ('+ph+')\nKehadiran: '+(att?'Hadir ('+gs+' orang)':'Tidak dapat hadir')+'\nYuran RM30: '+(paid==='sudah'?'Sudah dibayar':'Belum dibayar')+(nt?'\nCatatan: '+nt:''));
- function done(sent){$('#rf').style.display='none';var t=$('#thanks');t.style.display='block';$('#waBtn').href=wa;
-  $('#thMsg').textContent=(sent?'Pengesahan anda telah direkodkan. ':'Pengesahan belum dapat dihantar secara terus. Sila hantar melalui WhatsApp di bawah. ')+(att?'Jumpa anda pada 28 November 2026!':'Kami faham. Semoga berjumpa di majlis akan datang.');
+ function done(sent){$('#rf').style.display='none';var t=$('#thanks');t.style.display='block';
+  $('#thMsg').textContent=(sent?'Pengesahan anda telah direkodkan. ':'Pengesahan belum dapat dihantar. Sila cuba lagi sebentar lagi. ')+(att?'Jumpa anda pada 28 November 2026!':'Kami faham. Semoga berjumpa di majlis akan datang.');
   if(!sent){t.querySelector('.script').textContent='Hampir Siap'}t.scrollIntoView({behavior:'smooth',block:'center'})}
  if(!CFG){done(false);return}
  fetch(CFG.url+'/rest/v1/rsvp',{method:'POST',headers:{'Content-Type':'application/json',apikey:CFG.key,Authorization:'Bearer '+CFG.key,Prefer:'return=minimal'},body:JSON.stringify(row)})
-  .then(function(r){if(!r.ok)throw new Error(r.status);done(true)}).catch(function(){btn.disabled=false;btn.textContent='Hantar Pengesahan';res.innerHTML='<div class="res no">Maaf, penghantaran gagal. Cuba lagi, atau <a style="color:var(--gold2)" target="_blank" rel="noopener" href="'+wa+'">hantar melalui WhatsApp</a>.</div>'})});
+  .then(function(r){if(!r.ok)throw new Error(r.status);done(true)}).catch(function(){btn.disabled=false;btn.textContent='Hantar Pengesahan';res.innerHTML='<div class="res no">Maaf, penghantaran gagal. Cuba lagi.</div>'})});
 
 /* ---------- bukti pembayaran ---------- */
 function readB64(f){return new Promise(function(res,rej){var r=new FileReader();r.onload=function(){var x=String(r.result);res(x.slice(x.indexOf(',')+1))};r.onerror=function(){rej(new Error('Gagal membaca fail'))};r.readAsDataURL(f)})}
@@ -464,12 +463,11 @@ $('#pBtn').addEventListener('click',function(){var out=$('#pRes'),btn=this,st=$(
  if(st.length<3){out.innerHTML='<div class="res no">Sila isi nama pelajar.</div>';return}
  if(ph.replace(/\D/g,'').length<9){out.innerHTML='<div class="res no">Sila isi no. telefon waris yang sah.</div>';return}
  if(!f){out.innerHTML='<div class="res no">Sila pilih fail bukti pembayaran.</div>';return}
- var wa='https://wa.me/60129187235?text='+encodeURIComponent('Salam, saya hantar bukti pembayaran RM30 untuk '+st.toUpperCase()+' ('+ph+').');
- if(!CFG){out.innerHTML='<div class="res no">Muat naik terus belum tersedia. Sila <a style="color:var(--gold2)" target="_blank" rel="noopener" href="'+wa+'">hantar bukti melalui WhatsApp</a>.</div>';return}
+ if(!CFG){out.innerHTML='<div class="res no">Muat naik belum tersedia buat masa ini. Sila cuba sebentar lagi.</div>';return}
  btn.disabled=true;btn.textContent='Menghantar…';
  shrink(f).then(function(x){return rpc('hantar_bukti',{p_student:st,p_phone:ph,p_fail:x.fail,p_mime:x.mime,p_data:x.data})})
   .then(function(){out.innerHTML='<div class="res ok"><b>Terima kasih.</b> Bukti pembayaran anda telah diterima.</div>';$('#pFile').value='';$('#pInfo').textContent='';btn.textContent='Hantar Bukti Lain'})
-  .catch(function(e){var m=/Terlalu banyak/.test(e.message)?'Terlalu banyak bukti untuk nama ini. Hubungi Unit Pendaftaran.':(e.message&&!/^\d+$/.test(e.message)?e.message:'Penghantaran gagal.');out.innerHTML='<div class="res no">'+m.replace(/[<>&]/g,'')+' Anda juga boleh <a style="color:var(--gold2)" target="_blank" rel="noopener" href="'+wa+'">hantar melalui WhatsApp</a>.</div>';btn.textContent='Hantar Bukti'})
+  .catch(function(e){var m=/Terlalu banyak/.test(e.message)?'Terlalu banyak bukti untuk nama ini. Hubungi Unit Pendaftaran.':(e.message&&!/^\d+$/.test(e.message)?e.message:'Penghantaran gagal.');out.innerHTML='<div class="res no">'+m.replace(/[<>&]/g,'')+' Sila cuba lagi.</div>';btn.textContent='Hantar Bukti'})
   .then(function(){btn.disabled=false})});
 })();
 </script>
