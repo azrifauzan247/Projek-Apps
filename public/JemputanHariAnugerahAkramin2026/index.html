@@ -304,11 +304,6 @@ footer{position:relative;z-index:10;text-align:center;padding:0 20px 120px;font:
   <div class="script" style="font-size:46px">Jumpa di Majlis</div>
   <p class="note">Semoga kehadiran anda menjadikan majlis ini lebih bermakna buat anak-anak kita.</p>
   <div class="mot">“HIDUP BERPANDUKAN ALQURAN”</div>
-  <p class="note" style="margin-top:16px"><b>Unit Pendaftaran</b><br>Pertanyaan atau pengesahan kehadiran:</p>
-  <div class="row" style="margin-top:8px">
-   <a class="btn small" href="https://wa.me/60129187235" target="_blank" rel="noopener">Cikgu Aqila · 012-918 7235</a>
-   <a class="btn small ghost" href="https://wa.me/601116137643" target="_blank" rel="noopener">Ustazah Sarah · 011-1613 7643</a>
-  </div>
  </section>
 </main>
 <footer>HARI ANUGERAH KECEMERLANGAN DAN APRESIASI ASHABUL YAMIN 2026<br>#AshabulYamin2026</footer>
@@ -415,16 +410,16 @@ function tokens(raw){var seen={},out=[];norm(raw).split(' ').forEach(function(t)
 var FOUND={};
 function findLetter(){var raw=$('#sName').value,out=$('#sRes');
  if(raw.replace(/[^A-Za-z0-9]/g,'').length<3){out.innerHTML='<div class="res no">Sila taip sekurang-kurangnya 3 huruf nama pelajar (satu perkataan pun cukup).</div>';return}
- if(!CFG){out.innerHTML='<div class="res no">Carian belum tersedia. Hubungi Unit Pendaftaran di bawah.</div>';return}
+ if(!CFG){out.innerHTML='<div class="res no">Carian belum tersedia. Hubungi Unit Pendaftaran.</div>';return}
  out.innerHTML='<div class="res">Mencari…</div>';
  rpc('cari_surat3',{p_q:raw}).then(function(rows){rows=rows||[];
-  if(!rows.length){out.innerHTML='<div class="res no">Tiada surat dijumpai untuk <b></b>. Cuba nama lain (contohnya nama pertama), semak ejaan, atau surat belum tersedia. Hubungi Unit Pendaftaran di bawah jika perlu.</div>';out.querySelector('b').textContent=raw.trim();return}
+  if(!rows.length){out.innerHTML='<div class="res no">Tiada surat dijumpai untuk <b></b>. Cuba nama lain (contohnya nama pertama), semak ejaan, atau surat belum tersedia. Hubungi Unit Pendaftaran jika perlu.</div>';out.querySelector('b').textContent=raw.trim();return}
   var h='<div class="res ok">'+(rows.length===1?'Satu surat dijumpai.':rows.length+' surat dijumpai. Pilih nama anak anda:')+'<div style="margin-top:10px">';
   rows.forEach(function(r,i){FOUND[r.hash]=r;h+='<div style="display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid rgba(255,255,255,.15)"><b id="fn'+i+'" style="text-align:left"></b><button class="btn small" data-h="'+r.hash+'" style="flex:none">Muat Turun PDF</button></div>'});
   out.innerHTML=h+'</div>'+(rows.length>=10?'<div style="margin-top:8px;font-size:13px">Terlalu banyak padanan. Taip nama yang lebih lengkap untuk memudahkan.</div>':'')+'</div>';
   rows.forEach(function(r,i){$('#fn'+i).textContent=r.nama+(r.kod?' ('+r.kod+')':'')});
   if(rows.length===1&&!$('#rStudent').value)$('#rStudent').value=rows[0].nama})
- .catch(function(e){out.innerHTML='<div class="res no">Carian gagal ('+String(e.message||e).replace(/[<>&]/g,'')+'). Cuba lagi, atau hubungi Unit Pendaftaran di bawah.</div>'})}
+ .catch(function(e){out.innerHTML='<div class="res no">Carian gagal ('+String(e.message||e).replace(/[<>&]/g,'')+'). Cuba lagi, atau hubungi Unit Pendaftaran.</div>'})}
 $('#sRes').addEventListener('click',function(e){var b=e.target.closest('button[data-h]');if(!b)return;var h=b.getAttribute('data-h'),r=FOUND[h],t=b.textContent;b.disabled=true;b.textContent='…';
  rpc('ambil_surat',{p_hash:h}).then(function(rows){b.disabled=false;b.textContent=t;if(!rows||!rows[0]){alert('Surat tidak ditemui.');return}
   var u=URL.createObjectURL(b64blob(rows[0].data)),l=document.createElement('a'),disp=(r.nama+(r.kod?' '+r.kod:'')).toUpperCase();l.href=u;l.download=fileName(disp);document.body.appendChild(l);l.click();l.remove();setTimeout(function(){URL.revokeObjectURL(u)},4000)})
