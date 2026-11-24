@@ -76,6 +76,8 @@ small.h{display:block;opacity:.75;font-weight:500;font-size:13px}
    <h2>4. Bukti pembayaran <span id="bcnt" style="opacity:.7"></span></h2>
    <small class="h">Dimuat naik oleh ibu bapa di halaman jemputan.</small>
    <div style="margin-top:10px"><button class="btn ghost sm" id="breload">Muat semula</button></div>
+   <input type="search" id="bq" placeholder="Cari nama pelajar atau no. telefon…" autocomplete="off" style="margin-top:10px">
+   <div id="bsum" style="margin-top:6px;font-size:13px;opacity:.8"></div>
    <div id="blist"></div>
   </div>
 
@@ -173,9 +175,14 @@ $('#go').addEventListener('click',function(){var todo=Q.filter(function(x){retur
 /* bukti pembayaran */
 var BK=[];
 function loadBukti(){return rpc('senarai_bukti',{p_pass:PW}).then(function(r){BK=r||[];drawB()}).catch(function(e){$('#blist').innerHTML='<div class="msg no">Gagal memuat bukti: '+esc(e.message)+'. Pastikan bukti.sql telah dijalankan.</div>'})}
-function drawB(){$('#bcnt').textContent='('+BK.length+')';if(!BK.length){$('#blist').innerHTML='<p style="margin-top:12px;opacity:.75">Belum ada bukti diterima.</p>';return}
- var h='<table><tr><th>PELAJAR</th><th>MASA</th><th></th></tr>';BK.forEach(function(b){var d=new Date(b.created_at);h+='<tr><td class="n">'+esc(b.student)+'<small class="h">'+esc(b.phone||'')+' · '+kb(b.saiz||0)+'</small></td><td style="font-size:13px">'+esc(d.toLocaleDateString('ms-MY')+' '+d.toLocaleTimeString('ms-MY',{hour:'2-digit',minute:'2-digit'}))+'</td><td style="white-space:nowrap"><button class="btn ghost sm" data-v="'+b.id+'">Lihat</button> <button class="btn del sm" data-d="'+b.id+'" data-n="'+esc(b.student)+'">Padam</button></td></tr>'});
+function nd(x){return String(x||'').replace(/\D/g,'')}
+function drawB(){$('#bcnt').textContent='('+BK.length+')';if(!BK.length){$('#bsum').textContent='';$('#blist').innerHTML='<p style="margin-top:12px;opacity:.75">Belum ada bukti diterima.</p>';return}
+ var raw=$('#bq').value.trim(),q=norm(raw),qd=nd(raw),list=BK.filter(function(b){if(!raw)return true;var okN=q&&norm(b.student).indexOf(q)>=0;var okP=qd.length>=3&&nd(b.phone).indexOf(qd)>=0;return okN||okP});
+ $('#bsum').textContent=raw?(list.length+' daripada '+BK.length+' bukti dipadankan'):'';
+ if(!list.length){$('#blist').innerHTML='<div class="msg no" style="margin-top:12px">Tiada bukti dijumpai untuk <b></b>. Maksudnya belum ada bukti dimuat naik atas nama itu (cuba ejaan lain atau nama pertama sahaja).</div>';$('#blist').querySelector('b').textContent=raw;return}
+ var h='<table><tr><th>PELAJAR</th><th>MASA</th><th></th></tr>';list.forEach(function(b){var d=new Date(b.created_at);h+='<tr><td class="n">'+esc(b.student)+'<small class="h">'+esc(b.phone||'')+' · '+kb(b.saiz||0)+'</small></td><td style="font-size:13px">'+esc(d.toLocaleDateString('ms-MY')+' '+d.toLocaleTimeString('ms-MY',{hour:'2-digit',minute:'2-digit'}))+'</td><td style="white-space:nowrap"><button class="btn ghost sm" data-v="'+b.id+'">Lihat</button> <button class="btn del sm" data-d="'+b.id+'" data-n="'+esc(b.student)+'">Padam</button></td></tr>'});
  $('#blist').innerHTML=h+'</table>'}
+$('#bq').addEventListener('input',drawB);
 $('#breload').addEventListener('click',loadBukti);
 function b64blob(b64,type){var bin=atob(b64),n=bin.length,u=new Uint8Array(n);for(var i=0;i<n;i++)u[i]=bin.charCodeAt(i);return new Blob([u],{type:type})}
 var ovUrl=null;
