@@ -73,6 +73,17 @@ small.h{display:block;opacity:.75;font-weight:500;font-size:13px}
   </div>
 
   <div class="card">
+   <h2>Kehadiran RSVP <span id="rcnt" style="opacity:.7"></span></h2>
+   <small class="h">Hanya RSVP terkini bagi setiap pelajar dikira.</small>
+   <div id="rsum" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px"></div>
+   <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px" id="rfil">
+    <button class="btn sm" data-f="all">Semua</button><button class="btn ghost sm" data-f="y">Hadir</button><button class="btn ghost sm" data-f="n">Tidak hadir</button><button class="btn ghost sm" data-f="big">Lebih 3 orang</button><button class="btn ghost sm" data-f="unpaid">Belum bayar</button><button class="btn ghost sm" id="rreload">Muat semula</button>
+   </div>
+   <input type="search" id="rq" placeholder="Cari nama pelajar, waris atau no. telefon…" autocomplete="off" style="margin-top:10px">
+   <div id="rlist"></div>
+  </div>
+
+  <div class="card">
    <h2>4. Bukti pembayaran <span id="bcnt" style="opacity:.7"></span></h2>
    <small class="h">Dimuat naik oleh ibu bapa di halaman jemputan.</small>
    <div style="margin-top:10px"><button class="btn ghost sm" id="breload">Muat semula</button></div>
@@ -124,7 +135,7 @@ $('#login').addEventListener('click',function(){
  if(!CFG||!CFG.url||!CFG.key){var u=$('#cUrl').value.trim(),k=$('#cKey').value.trim();if(!u||!k){$('#loginMsg').innerHTML='<div class="msg no">Isi Project URL dan Anon key.</div>';return}CFG={url:u.replace(/\/rest\/v1\/?$/,'').replace(/\/$/,''),key:k};try{localStorage.setItem('ay_rsvp_cfg',JSON.stringify(CFG))}catch(e){}}
  var p=$('#pw').value;if(!p){$('#loginMsg').innerHTML='<div class="msg no">Isi kata laluan.</div>';return}
  $('#loginMsg').innerHTML='<div class="msg">Menyemak…</div>';
- rpc('senarai_surat',{p_pass:p}).then(function(rows){PW=p;try{sessionStorage.setItem('ay_pw',p)}catch(e){}$('#cLogin').classList.add('hide');$('#app').classList.remove('hide');render(rows);loadBukti()})
+ rpc('senarai_surat',{p_pass:p}).then(function(rows){PW=p;try{sessionStorage.setItem('ay_pw',p)}catch(e){}$('#cLogin').classList.add('hide');$('#app').classList.remove('hide');render(rows);loadBukti();loadRsvp()})
   .catch(function(e){$('#loginMsg').innerHTML='<div class="msg no">'+esc(/Kata laluan/.test(e.message)?'Kata laluan salah.':'Gagal: '+e.message+'. Pastikan surat.sql telah dijalankan.')+'</div>'})});
 $('#pw').addEventListener('keydown',function(e){if(e.key==='Enter')$('#login').click()});
 
@@ -173,6 +184,25 @@ $('#go').addEventListener('click',function(){var todo=Q.filter(function(x){retur
    .then(function(){i++;$('#pb').style.width=Math.round(i/todo.length*100)+'%';next()})})()});
 
 /* bukti pembayaran */
+/* kehadiran RSVP */
+var RV=[],RF='all';
+function loadRsvp(){return rpc('senarai_rsvp',{p_pass:PW}).then(function(r){RV=r||[];drawR()}).catch(function(e){$('#rlist').innerHTML='<div class="msg no">Gagal memuat RSVP: '+esc(e.message)+'. Pastikan rsvp2.sql telah dijalankan.</div>'})}
+function drawR(){var hadir=RV.filter(function(r){return r.attending}),tidak=RV.filter(function(r){return!r.attending}),tot=hadir.reduce(function(a,r){return a+(r.guests||0)},0),big=hadir.filter(function(r){return r.guests>3}),sudah=RV.filter(function(r){return r.paid==='sudah'}).length;
+ $('#rcnt').textContent='('+RV.length+')';
+ function box(n,l,c){return '<div style="background:rgba(255,255,255,.07);border:1.5px solid rgba(227,185,79,.45);border-radius:14px;padding:10px 12px"><div style="font:800 28px/1.1 Montserrat;color:'+(c||'var(--gold2)')+'">'+n+'</div><div style="font:600 12px Montserrat;opacity:.85">'+l+'</div></div>'}
+ $('#rsum').innerHTML=box(hadir.length,'KELUARGA HADIR','var(--aqua)')+box(tot,'JUMLAH HADIRIN (termasuk pelajar)')+box(tidak.length,'TIDAK HADIR','#ff9b9b')+box(big.length,'BAWA LEBIH 3 ORANG')+box(sudah,'SUDAH BAYAR (kata waris)')+box(RV.length-sudah,'BELUM BAYAR (kata waris)');
+ var raw=$('#rq').value.trim(),q=norm(raw),qd=nd(raw);
+ var list=RV.filter(function(r){if(RF==='y'&&!r.attending)return false;if(RF==='n'&&r.attending)return false;if(RF==='big'&&!(r.attending&&r.guests>3))return false;if(RF==='unpaid'&&r.paid==='sudah')return false;
+  if(!raw)return true;return (q&&(norm(r.student).indexOf(q)>=0||norm(r.guardian).indexOf(q)>=0))||(qd.length>=3&&nd(r.phone).indexOf(qd)>=0)});
+ if(!RV.length){$('#rlist').innerHTML='<p style="margin-top:12px;opacity:.75">Belum ada RSVP diterima.</p>';return}
+ if(!list.length){$('#rlist').innerHTML='<div class="msg no" style="margin-top:12px">Tiada RSVP sepadan.</div>';return}
+ var h='<table><tr><th>PELAJAR / WARIS</th><th>HADIR</th><th></th></tr>';
+ list.forEach(function(r){h+='<tr><td class="n">'+esc(r.student)+(r.unit?' <span style="opacity:.7;font-weight:500">('+esc(r.unit)+')</span>':'')+'<small class="h">'+esc(r.guardian)+' · '+esc(r.phone)+' · yuran: '+(r.paid==='sudah'?'sudah':'belum')+(r.note?'<br>Catatan: '+esc(r.note):'')+'</small></td><td>'+(r.attending?'<span class="st-ok">'+r.guests+' orang</span>'+(r.guests>3?'<small class="h st-w">lebih 3</small>':''):'<span class="st-no">Tidak</span>')+'</td><td><button class="btn del sm" data-rd="'+r.id+'" data-n="'+esc(r.student)+'">Padam</button></td></tr>'});
+ $('#rlist').innerHTML=h+'</table>'}
+$('#rq').addEventListener('input',drawR);
+$('#rreload').addEventListener('click',loadRsvp);
+$('#rfil').addEventListener('click',function(e){var b=e.target.closest('button[data-f]');if(!b)return;RF=b.getAttribute('data-f');document.querySelectorAll('#rfil button[data-f]').forEach(function(x){x.className='btn sm'+(x===b?'':' ghost')});drawR()});
+$('#rlist').addEventListener('click',function(e){var b=e.target.closest('button[data-rd]');if(!b)return;if(!confirm('Padam RSVP untuk '+b.getAttribute('data-n')+'?'))return;rpc('padam_rsvp',{p_pass:PW,p_id:Number(b.getAttribute('data-rd'))}).then(loadRsvp).catch(function(er){alert('Gagal memadam: '+er.message)})});
 var BK=[];
 function loadBukti(){return rpc('senarai_bukti',{p_pass:PW}).then(function(r){BK=r||[];drawB()}).catch(function(e){$('#blist').innerHTML='<div class="msg no">Gagal memuat bukti: '+esc(e.message)+'. Pastikan bukti.sql telah dijalankan.</div>'})}
 function nd(x){return String(x||'').replace(/\D/g,'')}
